@@ -67,7 +67,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('TIMEZONE', 'UTC'),
 
     /*
     |--------------------------------------------------------------------------
@@ -125,6 +125,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Custom ENV
+    |--------------------------------------------------------------------------
+    |
+    | This section is to define custom ENV's value
+    |
+    */
+
+    'passport_login_endpoint' => env('PASSPORT_LOGIN_ENDPOINT'),
+    'passport_client_id' => env('PASSPORT_CLIENT_ID'),
+    'passport_client_secret' => env('PASSPORT_CLIENT_SECRET'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Autoloaded Service Providers
     |--------------------------------------------------------------------------
     |
@@ -174,6 +187,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
 
     ],
 
