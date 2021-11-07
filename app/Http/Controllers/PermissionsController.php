@@ -22,10 +22,12 @@ class PermissionsController extends Controller
         if(!Auth::user()->can('permissions.list')) {
             return response()->json(['status' => false, 'message' => "Forbidden request due to insufficient permission"]);
         }
-
-        $permissions = Permission::all();
-
-        return response()->json(['status' => true, 'count' => $permissions->count(), 'data' => $permissions]);
+        
+        if($permissions = Permission::all()) {
+            return $this->successWithData("Success", $permissions);
+        } else {
+            return $this->failure("Failed to list permissions");
+        }
     }
 
     /**

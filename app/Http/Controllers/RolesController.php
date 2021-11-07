@@ -22,10 +22,12 @@ class RolesController extends Controller
         if(!Auth::user()->can('roles.list')) {
             return response()->json(['status' => false, 'message' => "Forbidden request due to insufficient permission"]);
         }
-
-        $roles = Role::with('permissions')->get();
-
-        return response()->json(['status' => true, 'count' => $roles->count(), 'data' => $roles]);
+        
+        if($roles = Role::with('permissions')->get()) {
+            return $this->successWithData("Success", $roles);
+        } else {
+            return $this->failure("Failed to list roles");
+        }
     }
 
     /**

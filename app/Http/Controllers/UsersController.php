@@ -25,9 +25,11 @@ class UsersController extends Controller
             return response()->json(['status' => false, 'message' => "Forbidden request due to insufficient permission"]);
         }
 
-        $users = User::all();
-
-        return response()->json(['status' => true, 'count' => $users->count(), 'data' => $users]);
+        if($users = User::all()) {
+            return $this->successWithData("Success", $users);
+        } else {
+            return $this->failure("Failed to list users");
+        }
     }
 
     /**
