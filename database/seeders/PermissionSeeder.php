@@ -20,7 +20,6 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'permissions.*', 'guard_name' => 'api']);
         Permission::create(['name' => 'permissions.list', 'guard_name' => 'api']);
         Permission::create(['name' => 'permissions.add', 'guard_name' => 'api']);
-        Permission::create(['name' => 'permissions.update', 'guard_name' => 'api']);
         Permission::create(['name' => 'permissions.delete', 'guard_name' => 'api']);
 
         // create 'Roles' permissions
