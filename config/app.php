@@ -135,6 +135,8 @@ return [
     'passport_login_endpoint' => env('PASSPORT_LOGIN_ENDPOINT'),
     'passport_client_id' => env('PASSPORT_CLIENT_ID'),
     'passport_client_secret' => env('PASSPORT_CLIENT_SECRET'),
+    'passport_tokens_expire_in' => env('PASSPORT_TOKENS_EXPIRE_IN'),
+    'passport_refresh_tokens_expire_in' => env('PASSPORT_REFRESH_TOKENS_EXPIRE_IN'),
 
     /*
     |--------------------------------------------------------------------------
