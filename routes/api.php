@@ -3,6 +3,12 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+// Import your controllers
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\PermissionsController;
+use App\Http\Controllers\RolesController;
+use App\Http\Controllers\UsersController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,8 +20,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
+Route::post('login', [LoginController::class, 'login']);
+
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::get('user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/login', [App\Http\Controllers\Auth\LoginController::class, 'login']);
+    Route::group(['prefix' => 'permissions'], function () {
+        Route::get('/', [PermissionsController::class, 'index']);
+    });
+
+    Route::group(['prefix' => 'roles'], function () {
+        Route::get('/', [RolesController::class, 'index']);
+    });
+
+    Route::group(['prefix' => 'users'], function () {
+        Route::get('/', [UsersController::class, 'index']);
+    });
+    });

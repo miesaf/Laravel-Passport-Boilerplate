@@ -42,16 +42,21 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
+    public function username()
+    {
+        return 'user_id';
+    }
+
     public function login(Request $request)
     {
         $credentials = [
-            'email' => $request->email,
+            'user_id' => $request->user_id,
             'password' => $request->password
         ];
 
         if(Auth::attempt($credentials)) {
             $user = User::find(Auth::user()->id);
-            $getTokenData = $this->getOauthTokenData($request->email, $request->password);
+            $getTokenData = $this->getOauthTokenData($request->user_id, $request->password);
 
             return response()->json($getTokenData);
         } else {

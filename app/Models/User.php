@@ -20,6 +20,7 @@ class User extends Authenticatable
      * @var string[]
      */
     protected $fillable = [
+        'user_id',
         'name',
         'email',
         'password',
@@ -43,4 +44,15 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Find the user instance for the given username for Laravel Passport.
+     *
+     * @param  string  $username
+     * @return \App\Models\User
+     */
+    public function findForPassport($username)
+    {
+        return $this->where('user_id', $username)->first();
+    }
 }
