@@ -24,8 +24,8 @@ Route::post('login', [LoginController::class, 'login']);
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('user', function (Request $request) {
-    return $request->user();
-});
+        return $request->user();
+    });
 
     Route::group(['prefix' => 'permissions'], function () {
         Route::get('/', [PermissionsController::class, 'index']);
@@ -43,5 +43,9 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::group(['prefix' => 'users'], function () {
         Route::get('/', [UsersController::class, 'index']);
+        Route::post('/', [UsersController::class, 'store']);
+        Route::get('{id}', [UsersController::class, 'show']);
+        Route::put('{id}', [UsersController::class, 'update']);
+        Route::delete('{id}', [UsersController::class, 'destroy']);
     });
-    });
+});

@@ -23,7 +23,7 @@ class RolesController extends Controller
             return response()->json(['status' => false, 'message' => "Forbidden request due to insufficient permission"]);
         }
 
-        $roles = Role::all();
+        $roles = Role::with('permissions')->get();
 
         return response()->json(['status' => true, 'count' => $roles->count(), 'data' => $roles]);
     }
