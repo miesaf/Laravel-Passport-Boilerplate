@@ -35,6 +35,10 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::group(['prefix' => 'roles'], function () {
         Route::get('/', [RolesController::class, 'index']);
+        Route::post('/', [RolesController::class, 'store']);
+        Route::get('{id}', [RolesController::class, 'show']);
+        Route::put('{id}', [RolesController::class, 'update']);
+        Route::delete('{id}', [RolesController::class, 'destroy']);
     });
 
     Route::group(['prefix' => 'users'], function () {

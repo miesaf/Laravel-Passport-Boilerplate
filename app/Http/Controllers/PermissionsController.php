@@ -44,7 +44,7 @@ class PermissionsController extends Controller
             'name' => 'required|unique:permissions|max:255'
         ]);
 
-        if(Permission::create($validated)) {
+        if(Permission::create(['name'=>$request->name, 'guard_name'=>'api'])) {
             return $this->success("Permission created successfully");
         } else {
             return $this->failure("Failed to create permission");
@@ -63,7 +63,7 @@ class PermissionsController extends Controller
             return response()->json(['status' => false, 'message' => "Forbidden request due to insufficient permission"]);
         }
 
-        if(Permission::find($id)->delete()) {
+        if((Permission::find($id) != null) && Permission::find($id)->delete()) {
             return $this->success("Permission deleted successfully");
         } else {
             return $this->failure("Failed to delete permission");
