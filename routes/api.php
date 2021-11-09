@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 // Import your controllers
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UsersController;
@@ -21,9 +22,13 @@ use App\Http\Controllers\ProfilesController;
 |
 */
 
-Route::post('login', [LoginController::class, 'login']);
+Route::post('login', [LoginController::class, 'login'])->name('login');
+Route::post('refreshToken', [LoginController::class, 'refreshToken']);
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
 
 Route::group(['middleware' => 'auth:api'], function () {
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+
     Route::group(['prefix' => 'user'], function () {
         Route::get('/', function (Request $request) {
             return $request->user();
