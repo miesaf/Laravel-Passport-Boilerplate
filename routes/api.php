@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\ProfilesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,8 +24,11 @@ use App\Http\Controllers\UsersController;
 Route::post('login', [LoginController::class, 'login']);
 
 Route::group(['middleware' => 'auth:api'], function () {
-    Route::get('user', function (Request $request) {
-        return $request->user();
+    Route::group(['prefix' => 'user'], function () {
+        Route::get('/', function (Request $request) {
+            return $request->user();
+        });
+        Route::post('changePassword', [ProfilesController::class, 'changePassword']);
     });
 
     Route::group(['prefix' => 'permissions'], function () {

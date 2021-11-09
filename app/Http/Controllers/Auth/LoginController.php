@@ -4,14 +4,18 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
+use App\Http\Traits\ResponseTrait;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use App\Models\User;
 use Auth;
 use Http;
 
 class LoginController extends Controller
 {
+    use ResponseTrait;
+
     /*
     |--------------------------------------------------------------------------
     | Login Controller
@@ -54,14 +58,63 @@ class LoginController extends Controller
             'password' => $request->password
         ];
 
-        if(Auth::attempt($credentials)) {
-            $user = User::find(Auth::user()->id);
-            $getTokenData = $this->getOauthTokenData($request->user_id, $request->password);
+        if($user = User::where('user_id', $request->user_id)->first()) {
+            // Incremenet login count
+            Controller::login_attempt($user->user_id);
 
-            return response()->json($getTokenData);
-        } else {
-            return response()->json(['message'=>'Invalid login credentials'], 401);
+            // Check account policy
+            if($account_policy_check = Controller::pre_login_check($user->user_id)) {
+                return response()->json($account_policy_check);
+            }
+
+            if(Auth::attempt($credentials)) {
+                // Reset login count
+                Controller::reset_login_attempt($user->user_id);
+
+                // Deactivate dormant account
+                if($account_dormant_check = Controller::post_login_check($user->user_id)) {
+                    return response()->json($account_dormant_check);
+                }
+
+                // Check all account flags
+                if(!Auth::user()->is_active) {
+                    return $this->failure("Your account was deactivated");
+                }
+
+                if(Auth::user()->is_locked) {
+                    return $this->failure("Your account was locked");
+                }
+
+                // Check password expiry (to be moved to a middleware)
+                if($account_dormant_check = Controller::password_expiry_check($user->user_id)) {
+                    return response()->json($account_dormant_check);
+                }
+
+                // Check password force change (to be moved to a middleware)
+                if(Auth::user()->is_force_change) {
+                    return $this->failure("You are required to change your password");
+                }
+
+                $getTokenData = $this->getOauthTokenData($request->user_id, $request->password);
+
+                // Log current login
+                Auth::user()->update([
+                    'current_signin' => Carbon::now(),
+                    'last_signin' => Auth::user()->current_signin
+                ]);
+
+                return response()->json([
+                    'status'=>true,
+                    'message'=>'Login successful',
+                    'token'=>$getTokenData,
+                    'user'=>User::where('user_id', $request->user_id)->first()
+                ]);
+            }
         }
+        
+        // User id not found. Throttle login increment
+
+        return $this->failure("Invalid login credentials");
     }
 
     private function getOauthTokenData($username, $password)
@@ -78,7 +131,7 @@ class LoginController extends Controller
                 'password' => $password
             ]);
 
-            return  json_decode($response->body());
+            return json_decode($response->body());
         } catch (\GuzzleHttp\Exception\BadResponseException $e) {
             if ($e->getCode() == 400) {
                 return response()->json('Invalid Request. Please enter a username or a password.', $e->getCode());
