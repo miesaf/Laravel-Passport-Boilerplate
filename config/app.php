@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Laravel Passport Boilerplate'),
 
     /*
     |--------------------------------------------------------------------------
@@ -53,6 +53,7 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
+    'url_fe' => env('APP_FE', 'http://localhost'),
 
     'asset_url' => env('ASSET_URL', null),
 
@@ -67,7 +68,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('TIMEZONE', 'UTC'),
 
     /*
     |--------------------------------------------------------------------------
@@ -122,6 +123,21 @@ return [
     'key' => env('APP_KEY'),
 
     'cipher' => 'AES-256-CBC',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Custom ENV
+    |--------------------------------------------------------------------------
+    |
+    | This section is to define custom ENV's value
+    |
+    */
+
+    'passport_login_endpoint' => env('PASSPORT_LOGIN_ENDPOINT'),
+    'passport_client_id' => env('PASSPORT_CLIENT_ID'),
+    'passport_client_secret' => env('PASSPORT_CLIENT_SECRET'),
+    'passport_tokens_expire_in' => env('PASSPORT_TOKENS_EXPIRE_IN'),
+    'passport_refresh_tokens_expire_in' => env('PASSPORT_REFRESH_TOKENS_EXPIRE_IN'),
 
     /*
     |--------------------------------------------------------------------------
