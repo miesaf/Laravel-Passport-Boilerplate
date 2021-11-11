@@ -35,4 +35,13 @@ Route::group(['middleware' => ['auth:api', 'forcePwdChg']], function () {
 
         Route::post('changePassword', [ProfilesController::class, 'changePassword'])->withoutMiddleware('forcePwdChg');
     });
+    });
+
+    Route::group(['prefix' => 'roles'], function () {
+        Route::get('/', [RolesController::class, 'index']);
+        Route::post('/', [RolesController::class, 'store']);
+        Route::get('{id}', [RolesController::class, 'show']);
+        Route::put('{id}', [RolesController::class, 'update']);
+        Route::delete('{id}', [RolesController::class, 'destroy']);
+    });
 });
