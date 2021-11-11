@@ -110,6 +110,20 @@ class LoginController extends Controller
         return $this->failure("Invalid login credentials");
     }
 
+    public function refreshToken(Request $request) {
+        $validated = $request->validate([
+            'refresh_token' => 'required'
+        ]);
+
+        $getNewTokenData = $this->refreshOauthToken($request->refresh_token);
+
+        return response()->json([
+            'status'=>true,
+            'message'=>'Token refreshed successfully',
+            'token'=>$getNewTokenData
+        ]);
+    }
+
     private function getOauthTokenData($username, $password)
     {
         try {
@@ -130,6 +144,32 @@ class LoginController extends Controller
                 return response()->json('Invalid Request. Please enter a username or a password.', $e->getCode());
             } else if ($e->getCode() == 401) {
                 return response()->json('Your credentials are incorrect. Please try again.', $e->getCode());
+            }
+
+            return response()->json('Something went wrong on the server.', $e->getCode());
+        }
+    }
+
+    private function refreshOauthToken($refresh_token)
+    {
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
+            ])->post(config('app.passport_login_endpoint'), [
+                'grant_type' => 'refresh_token',
+                'refresh_token' => $refresh_token,
+                'client_id' => config('app.passport_client_id'),
+                'client_secret' => config('app.passport_client_secret'),
+                'scope' => ''
+            ]);
+
+            return json_decode($response->body());
+        } catch (\GuzzleHttp\Exception\BadResponseException $e) {
+            if ($e->getCode() == 400) {
+                return response()->json('Invalid Request. Please enter a refresh token.', $e->getCode());
+            } else if ($e->getCode() == 401) {
+                return response()->json('Your refresh token has expired. Please reauthenticate.', $e->getCode());
             }
 
             return response()->json('Something went wrong on the server.', $e->getCode());
