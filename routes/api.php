@@ -26,6 +26,8 @@ Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEm
 Route::post('password/reset', [ResetPasswordController::class, 'reset']);
 
 Route::group(['middleware' => ['auth:api', 'forcePwdChg']], function () {
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout')->withoutMiddleware('forcePwdChg');
+
     Route::group(['prefix' => 'user'], function () {
         Route::get('/', function (Request $request) {
             return $request->user();

@@ -124,6 +124,23 @@ class LoginController extends Controller
         ]);
     }
 
+    public function logout(Request $request) {
+        $tokenRepository = app(TokenRepository::class);
+        $refreshTokenRepository = app(RefreshTokenRepository::class);
+
+        $token = $request->bearerToken();
+        $jwt = explode(".", $token);
+        $token_id = json_decode(base64_decode($jwt[1]))->jti;
+
+        // Revoke an access token...
+        $tokenRepository->revokeAccessToken($token_id);
+
+        // Revoke all of the token's refresh tokens...
+        $refreshTokenRepository->revokeRefreshTokensByAccessTokenId($token_id);
+
+        return $this->success("Logout successful");
+    }
+
     private function getOauthTokenData($username, $password)
     {
         try {
