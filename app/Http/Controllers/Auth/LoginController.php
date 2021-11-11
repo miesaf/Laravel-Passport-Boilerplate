@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use App\Http\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Laravel\Passport\TokenRepository;
 use Laravel\Passport\RefreshTokenRepository;
