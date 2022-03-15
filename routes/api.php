@@ -58,6 +58,12 @@ Route::group(['middleware' => ['auth:api', 'forcePwdChg']], function () {
         Route::delete('{id}', [UsersController::class, 'destroy']);
     });
 
+    Route::group(['prefix' => 'pwdPolicies'], function () {
+        Route::get('/', [PasswordPoliciesController::class, 'index']);
+        Route::get('{id}', [PasswordPoliciesController::class, 'show']);
+        Route::post('{id}/update', [PasswordPoliciesController::class, 'update']);
+    });
+
     Route::group(['prefix' => 'auditTrails'], function () {
         Route::get('/', [AuditTrailsController::class, 'index']);
         Route::post('search', [AuditTrailsController::class, 'search']);

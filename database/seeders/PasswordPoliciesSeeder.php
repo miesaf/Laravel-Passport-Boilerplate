@@ -21,7 +21,7 @@ class PasswordPoliciesSeeder extends Seeder
         PasswordPolicy::create(['name' => 'Special characters', 'desc' => 'Presence of any special character/symbol', 'value' => null, 'status' => false]);
         PasswordPolicy::create(['name' => 'Maximum failed attempt', 'desc' => 'The maximum number of failed attempt', 'value' => 3, 'status' => false]);
         PasswordPolicy::create(['name' => 'Lock on max failed attempt', 'desc' => 'Lock the account upon reaching the maximum number of failed attempt', 'value' => null, 'status' => false]);
-        PasswordPolicy::create(['name' => 'Grace period on max failed attempt', 'desc' => 'Grace period in minutes that prevents any login activity upon reaching the maximum number of failed attempt (regardless of any user ID)', 'value' => null, 'status' => false]);
+        PasswordPolicy::create(['name' => 'Grace period on max failed attempt', 'desc' => 'Grace period in minutes that prevents any login activity upon reaching the maximum number of failed attempt (regardless of any user ID)', 'value' => 2, 'status' => false]);
         PasswordPolicy::create(['name' => 'Minimum age (days)', 'desc' => 'The minimim number of days before being allowed to change new password', 'value' => 3, 'status' => false]);
         PasswordPolicy::create(['name' => 'Maximum age (days)', 'desc' => 'The maximum number of days before password will be considered expired', 'value' => 90, 'status' => false]);
         PasswordPolicy::create(['name' => 'Dormant account (days)', 'desc' => 'The number of days passed without successful login before account will be considered inactive', 'value' => 90, 'status' => false]);

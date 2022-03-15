@@ -11,6 +11,7 @@ use Laravel\Passport\TokenRepository;
 use Laravel\Passport\RefreshTokenRepository;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\PasswordPolicy;
 use Auth;
 use Http;
 
@@ -65,6 +66,11 @@ class LoginController extends Controller
         Controller::audit_log($request->user_id, $masked, "auth.login");
 
         if($user = User::where('user_id', $request->user_id)->first()) {
+            // Check password exists (First time login)
+            if(!$user->password) {
+                return $this->failure("Please perform First Time Login", 200);
+            }
+
             // Incremenet login count
             Controller::login_attempt($user->user_id);
 
@@ -84,11 +90,11 @@ class LoginController extends Controller
 
                 // Check all account flags
                 if(!Auth::user()->is_active) {
-                    return $this->failure("Your account was deactivated");
+                    return $this->failure("Your account was deactivated", 200);
                 }
 
                 if(Auth::user()->is_locked) {
-                    return $this->failure("Your account was locked");
+                    return $this->failure("Your account was locked", 200);
                 }
 
                 if(($getTokenData = $this->getOauthTokenData($request->user_id, $request->password)) && isset($getTokenData->access_token)) {
@@ -112,7 +118,25 @@ class LoginController extends Controller
             // User id not found. Throttle login increment
         }
 
-        return $this->failure("Invalid login credentials");
+        // 6) Maximum failed attempt
+        $max_attempt = PasswordPolicy::find(6);
+
+        if($max_attempt->status) {
+            $max_attempt_val = (int) $max_attempt->value;
+
+            // 8) Grace period on max failed attempts
+            $grace = PasswordPolicy::find(8);
+            $grace = $grace->status ? (int) $grace->value : 0;
+        } else {
+            $max_attempt_val = $grace = 0;
+        }
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Invalid login credentials',
+            'max_attempt' => $max_attempt_val,
+            'grace' => $grace
+        ]);
     }
 
     public function refreshToken(Request $request) {
