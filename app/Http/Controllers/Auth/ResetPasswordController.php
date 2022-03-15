@@ -17,7 +17,7 @@ use DB;
 class ResetPasswordController extends Controller
 {
     use ResponseTrait;
-    
+
     /*
     |--------------------------------------------------------------------------
     | Password Reset Controller

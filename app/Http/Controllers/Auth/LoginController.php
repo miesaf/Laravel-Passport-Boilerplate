@@ -104,14 +104,33 @@ class LoginController extends Controller
                         'last_signin' => Auth::user()->current_signin
                     ]);
 
+                    $userInfo = User::where('user_id', $request->user_id)->first();
+                    $userInfo->getAllPermissions();
+
                     return response()->json([
-                        'status'=>true,
-                        'message'=>'Login successful',
-                        'token'=>$getTokenData,
-                        'user'=>User::where('user_id', $request->user_id)->first()
+                        'status' => true,
+                        'message' => 'Login successful',
+                        'token' => [
+                            'token_type' => $getTokenData->token_type,
+                            'expires_in' => $getTokenData->expires_in,
+                            'expires_on' => Carbon::now()->add($getTokenData->expires_in . ' seconds'),
+                            'refresh_expires_in' => (int) config('app.passport_refresh_tokens_expire_in') * 60,
+                            'refresh_expires_on' => Carbon::now()->add((((int) config('app.passport_refresh_tokens_expire_in')) * 60) . ' seconds'),
+                            'access_token' => $getTokenData->access_token,
+                            'refresh_token' => $getTokenData->refresh_token
+                        ],
+                        'user' => $userInfo
                     ]);
                 } else {
-                    return $this->failure("Authentication error");
+                    if(config('app.debug')) {
+                        return response()->json([
+                            'status'=>false,
+                            'message'=>'Authentication error',
+                            'debug'=>$getTokenData
+                        ]);
+                    } else {
+                        return $this->failure("Authentication error", 200);
+                    }
                 }
             }
         } else {
