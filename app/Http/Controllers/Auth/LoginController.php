@@ -173,20 +173,27 @@ class LoginController extends Controller
     }
 
     public function logout(Request $request) {
-        $tokenRepository = app(TokenRepository::class);
-        $refreshTokenRepository = app(RefreshTokenRepository::class);
+        try {
+            $tokenRepository = app(TokenRepository::class);
+            $refreshTokenRepository = app(RefreshTokenRepository::class);
 
-        $token = $request->bearerToken();
-        $jwt = explode(".", $token);
-        $token_id = json_decode(base64_decode($jwt[1]))->jti;
+            if($request->bearerToken()) {
+                $token = $request->bearerToken();
+                $jwt = explode(".", $token);
+                $token_id = json_decode(base64_decode($jwt[1]))->jti;
 
-        // Revoke an access token...
-        $tokenRepository->revokeAccessToken($token_id);
+                // Revoke an access token...
+                $tokenRepository->revokeAccessToken($token_id);
 
-        // Revoke all of the token's refresh tokens...
-        $refreshTokenRepository->revokeRefreshTokensByAccessTokenId($token_id);
+                // Revoke all of the token's refresh tokens...
+                $refreshTokenRepository->revokeRefreshTokensByAccessTokenId($token_id);
+            }
 
-        return $this->success("Logout successful");
+            return $this->success("Logout successful");
+        } catch (Throwable $e) {
+            report($e);
+            return $this->failed("Token revocation failed");
+        }
     }
 
     private function getOauthTokenData($username, $password)
