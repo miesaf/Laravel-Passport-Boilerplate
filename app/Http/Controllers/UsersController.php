@@ -48,19 +48,18 @@ class UsersController extends Controller
         Controller::audit_log(Auth::user()->user_id, $request, "users.store");
 
         $validated = $request->validate([
-            'user_id' => 'required|unique:users',
-            'name' => 'required',
-            'email' => 'required|email',
-            'role' => 'exists:roles,name',
-            'permissions' => 'array|exists:permissions,name'
+            'user_id' => 'required|unique:users,user_id,NULL,id,deleted_at,NULL',
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email,NULL,id,deleted_at,NULL',
+            'roles' => 'required|array|exists:roles,name',
+            'permissions' => 'array|exists:permissions,name',
+            'status' => 'required|boolean'
         ]);
 
-        $validated['password'] = bcrypt(Str::random(8));
-
-        if(User::create($validated)->assignRole($request->role)->givePermissionTo($request->permissions)) {
-            return $this->success("User created successfully");
+        if(User::create($validated)->assignRole($request->roles)->givePermissionTo($request->permissions)) {
+            return $this->success("User registered successfully");
         } else {
-            return $this->failure("Failed to create user");
+            return $this->failure("Failed to register user");
         }
     }
 
