@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
+// use Illuminate\Validation\Rules\Password;
 use Illuminate\Http\Request;
 use App\Http\Traits\ResponseTrait;
 use App\Mail\APIResetPassword;
@@ -44,10 +45,6 @@ class ForgotPasswordController extends Controller
                 return $this->failure("Your account was deactivated. Please contact system administrator to reactivate your account.");
             }
 
-            // if($user->is_locked) {
-            //     return $this->failure("Your account was locked. Please contact system administrator to unlock your account.");
-            // }
-
             if(!$user->email) {
                 return $this->failure("Email was not defined.");
             }
@@ -61,7 +58,7 @@ class ForgotPasswordController extends Controller
 
             $reset = (object) array();
 
-            $reset->link = config('app.url_fe') . "/passwords/reset/$token";
+            $reset->link = config('app.url_fe') . "/password/reset/$token";
             $reset->appName = config('app.name');
             $reset->appURL = config('app.url_fe');
             $reset->userName = $user->name;
