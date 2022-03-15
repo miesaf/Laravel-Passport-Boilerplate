@@ -57,7 +57,11 @@ class RouteServiceProvider extends ServiceProvider
     protected function configureRateLimiting()
     {
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
+            return Limit::perMinute(60)
+                ->by(optional($request->user())->id ?: $request->ip())
+                ->response(function () {
+                    return response()->json(['status' => false, 'message' => 'Request blocked due to too many attempts. Cool down period initiated. Please try again later after ONE (1) minute.'], 429);
+                });
         });
     }
 }
