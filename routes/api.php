@@ -11,6 +11,7 @@ use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\ProfilesController;
+use App\Http\Controllers\PasswordPoliciesController;
 
 /*
 |--------------------------------------------------------------------------
