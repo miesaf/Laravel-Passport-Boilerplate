@@ -185,7 +185,7 @@ class Controller extends BaseController
             $user = $this->get_user($user_id);
 
             if($user->is_locked) {
-                return ['status'=>false, 'message'=>'Your account was locked'];
+                return ['status'=>false, 'message'=>'Your account was locked', 'locked'=>true];
             } else {
                 if($user->failed_attempts >= $policies[6]->value) {
                     // 7) Lock on max failed attempts
@@ -231,5 +231,40 @@ class Controller extends BaseController
         }
 
         return true;
+    }
+
+    public function mask_value($vardata)
+    {
+        // get JSON start position
+        $psn = stripos($vardata, '{');
+
+        // get JSON
+        $json = substr($vardata, $psn);
+
+        // Decode JSON
+        $jsonObj = json_decode($json);
+
+        // Masking password
+        if(isset($jsonObj->password)) {
+            $jsonObj->password = "********";
+        }
+
+        if(isset($jsonObj->confirm_password)) {
+            $jsonObj->confirm_password = "********";
+        }
+
+        if(isset($jsonObj->old_password)) {
+            $jsonObj->old_password = "********";
+        }
+
+        if(isset($jsonObj->new_password)) {
+            $jsonObj->new_password = "********";
+        }
+
+        // Encode back JSON
+        $newJSON = json_encode($jsonObj);
+
+        // Replace actual JSON with password masked JSON
+        return str_replace($json, $newJSON, $vardata);
     }
 }
