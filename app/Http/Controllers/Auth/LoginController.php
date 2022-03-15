@@ -60,6 +60,10 @@ class LoginController extends Controller
             'password' => 'required'
         ]);
 
+        // Logging into audit trail
+        $masked = Controller::mask_value($request);
+        Controller::audit_log($request->user_id, $masked, "auth.login");
+
         if($user = User::where('user_id', $request->user_id)->first()) {
             // Incremenet login count
             Controller::login_attempt($user->user_id);

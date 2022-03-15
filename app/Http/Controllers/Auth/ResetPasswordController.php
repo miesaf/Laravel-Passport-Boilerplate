@@ -42,7 +42,10 @@ class ResetPasswordController extends Controller
     {
         // Validate token existance/string validity
         if($token = DB::table('password_resets')->where('token', $request->token)->first()) {
-            // $T_created = Carbon::createFromTimeString('Y-m-d H:m:s', $token->created_at);
+            // Logging into audit trail
+            $masked = Controller::mask_value($request);
+            Controller::audit_log($token->user_id, $masked, "auth.resetpwd");
+
             $T_now = Carbon::now();
             $T_created = Carbon::createFromTimeString($token->created_at);
 

@@ -60,4 +60,10 @@ Route::group(['middleware' => ['auth:api', 'forcePwdChg']], function () {
         Route::put('{id}', [UsersController::class, 'update']);
         Route::delete('{id}', [UsersController::class, 'destroy']);
     });
+
+    Route::group(['prefix' => 'auditTrails'], function () {
+        Route::get('/', [AuditTrailsController::class, 'index']);
+        Route::post('search', [AuditTrailsController::class, 'search']);
+        Route::get('{id}', [AuditTrailsController::class, 'show']);
+    });
 });

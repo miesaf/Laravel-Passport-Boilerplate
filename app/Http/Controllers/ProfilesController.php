@@ -23,6 +23,10 @@ class ProfilesController extends Controller
             'new_password' => 'required'
         ]);
 
+        // Logging into audit trail
+        $masked = Controller::mask_value($request);
+        Controller::audit_log(Auth::user()->user_id, $masked, "auth.chgpwd");
+
         if(!Hash::check($request->old_password, Auth::user()->password)) {
             return $this->failure("Old password is incorrect");
         }

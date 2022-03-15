@@ -36,6 +36,9 @@ class ForgotPasswordController extends Controller
             'user_id' => 'required'
         ]);
 
+        // Logging into audit trail
+        Controller::audit_log($request->user_id, $request, "auth.forgotpwd");
+
         if($user = User::where('user_id', $request->user_id)->first()) {
             if(!$user->is_active) {
                 return $this->failure("Your account was deactivated. Please contact system administrator to reactivate your account.");

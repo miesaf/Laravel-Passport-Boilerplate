@@ -9,6 +9,7 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Routing\Controller as BaseController;
 use App\Models\PasswordPolicy;
 use App\Models\PasswordHistory;
+use App\Models\AuditTrail;
 use App\Models\User;
 use Carbon\Carbon;
 use Hash;
@@ -43,7 +44,7 @@ class Controller extends BaseController
     {
         return User::where('user_id', $user_id)->first()->update(['failed_attempts' => 0]);
     }
-    
+
     public function password_policy_check($user_id, $password)
     {
         $policies = $this->get_policies();
@@ -73,7 +74,7 @@ class Controller extends BaseController
                 return ['status'=>false, 'message'=>'New password must contain both characters and numbers'];
             }
         }
-        
+
         // 4) Multicase
         if ($policies[4]->status) {
             $uppercase = preg_match('@[A-Z]@', $password);
@@ -83,18 +84,18 @@ class Controller extends BaseController
                 return ['status'=>false, 'message'=>'New password must contain both upper and lower case'];
             }
         }
-        
+
         // 5) Special characters
         if ($policies[5]->status) {
             $validator = validator()->make(['password'=>$password], [
                 'password' => ['required', Password::min(1)->symbols()],
             ]);
-    
+
             if ($validator->fails()) {
                 return ['status'=>false, 'message'=>'New password must contain a symbol/special character'];
             }
         }
-        
+
         // 9) Minimum age (days)
         if ($policies[9]->status) {
             $now = Carbon::now();
@@ -104,7 +105,7 @@ class Controller extends BaseController
                 return ['status'=>false, 'message'=>'Your password has not passed minimum age of ' . $policies[9]->value . ' day(s). Password change rejected.'];
             }
         }
-        
+
         // 12) Prevent reuse of password (cycles)
         if ($policies[12]->status) {
             $histories = PasswordHistory::where('user_id', $user_id)->latest()->take((int) $policies[12]->value - 1)->get();
@@ -115,7 +116,7 @@ class Controller extends BaseController
                 }
             }
         }
-        
+
         // 13) Does not contain user's name
         if ($policies[13]->status) {
             $user = $this->get_user($user_id);
@@ -127,14 +128,14 @@ class Controller extends BaseController
                 }
             }
         }
-        
+
         // 14) Does not contain user's ID
         if ($policies[14]->status) {
             if (stripos($password, $user_id) !== false) {
                 return ['status'=>false, 'message'=>'New password cannot contain your user ID'];
             }
         }
-        
+
         // 15) Does not contain user's email
         if ($policies[15]->status) {
             $user = $this->get_user($user_id);
@@ -192,16 +193,9 @@ class Controller extends BaseController
                         User::where('user_id', $user_id)->first()->update(['is_locked' => true]);
                         return ['status'=>false, 'message'=>'Your account was locked due to maximum number of failed login attempts'];
                     }
-
-                    return ['status'=>false, 'message'=>'Password must contain both upper and lower case'];
                 }
             }
         }
-        
-        // 8) Grace period on max failed attempts
-        // if ($policies[8]->status) {
-        //     return false;
-        // }
     }
 
     public function post_login_check($user_id)
@@ -219,5 +213,23 @@ class Controller extends BaseController
                 return ['status'=>false, 'message'=>'Your account was deactivated due to being dormant for more than ' . $policies[11]->value . ' days.'];
             }
         }
+    }
+
+    public function audit_log($user_id, $vardata, $category)
+    {
+        $now = Carbon::now();
+        $audit = new AuditTrail;
+
+        $audit->user_id = $user_id;
+        $audit->req_time = $now;
+        $audit->vardata = $vardata;
+        $audit->category = $category;
+
+        if(!$audit->save()) {
+            // Do something if audit trail logging failed
+            // return $this->failure("Failed to delete option");
+        }
+
+        return true;
     }
 }

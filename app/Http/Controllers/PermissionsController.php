@@ -46,6 +46,9 @@ class PermissionsController extends Controller
             'name' => 'required|unique:permissions|max:255'
         ]);
 
+        // Logging into audit trail
+        Controller::audit_log(Auth::user()->user_id, $request, "permissions.store");
+
         if(Permission::create(['name'=>$request->name, 'guard_name'=>'api'])) {
             return $this->success("Permission created successfully");
         } else {
@@ -59,11 +62,14 @@ class PermissionsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         if(!Auth::user()->can('permissions.delete')) {
             return $this->forbidden();
         }
+
+        // Logging into audit trail
+        Controller::audit_log(Auth::user()->user_id, $request, "permissions.destroy");
 
         if((Permission::find($id) != null) && Permission::find($id)->delete()) {
             return $this->success("Permission deleted successfully");

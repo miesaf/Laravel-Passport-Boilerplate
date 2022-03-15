@@ -42,6 +42,9 @@ class RolesController extends Controller
             return $this->forbidden();
         }
 
+        // Logging into audit trail
+        Controller::audit_log(Auth::user()->user_id, $request, "roles.store");
+
         $validated = $request->validate([
             'name' => 'required|unique:roles|max:255',
             'permissions' => 'array|exists:permissions,name'
@@ -86,6 +89,9 @@ class RolesController extends Controller
             return $this->forbidden();
         }
 
+        // Logging into audit trail
+        Controller::audit_log(Auth::user()->user_id, $request, "roles.update");
+
         $validated = $request->validate([
             'permissions' => 'array|exists:permissions,name'
         ]);
@@ -103,11 +109,14 @@ class RolesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         if(!Auth::user()->can('roles.delete')) {
             return $this->forbidden();
         }
+
+        // Logging into audit trail
+        Controller::audit_log(Auth::user()->user_id, $request, "roles.delete");
 
         if((Role::find($id) != null) && Role::find($id)->delete()) {
             return $this->success("Role deleted successfully");

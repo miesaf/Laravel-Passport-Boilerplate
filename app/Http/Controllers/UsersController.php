@@ -44,6 +44,9 @@ class UsersController extends Controller
             return $this->forbidden();
         }
 
+        // Logging into audit trail
+        Controller::audit_log(Auth::user()->user_id, $request, "users.store");
+
         $validated = $request->validate([
             'user_id' => 'required|unique:users',
             'name' => 'required',
@@ -93,7 +96,12 @@ class UsersController extends Controller
             return $this->forbidden();
         }
 
+        // Logging into audit trail
+        Controller::audit_log(Auth::user()->user_id, $request, "users.update");
+
+        $request->merge(['id' => $request->route('id')]);
         $validated = $request->validate([
+            'id' => 'required|integer',
             'user_id' => 'required|unique:users,user_id,' . $id,
             'name' => 'required',
             'email' => 'required|email',
@@ -118,11 +126,19 @@ class UsersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         if(!Auth::user()->can('users.delete')) {
             return $this->forbidden();
         }
+
+        // Logging into audit trail
+        Controller::audit_log(Auth::user()->user_id, $request, "users.delete");
+
+        $request->merge(['id' => $request->route('id')]);
+        $validated = $request->validate([
+            'id' => 'required|integer',
+        ]);
 
         if((User::find($id) != null) && User::find($id)->delete()) {
             return $this->success("User deleted successfully");
