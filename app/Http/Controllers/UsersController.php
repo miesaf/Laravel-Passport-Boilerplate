@@ -107,15 +107,18 @@ class UsersController extends Controller
         $validated = $request->validate([
             'id' => 'required|integer',
             'user_id' => 'required|unique:users,user_id,' . $id,
-            'name' => 'required',
-            'email' => 'required|email',
-            'role' => 'exists:roles,name',
-            'permissions' => 'array|exists:permissions,name'
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'roles' => 'required|array|exists:roles,name',
+            'permissions' => 'array|exists:permissions,name',
+            'status' => 'required|boolean'
         ]);
+
+        $validated['is_active'] = $validated['status'];
 
         if($user = User::find($id)) {
             $user->update($validated);
-            $user->syncRoles($request->role);
+            $user->syncRoles($request->roles);
             $user->syncPermissions($request->permissions);
 
             return $this->success("User updated successfully");
