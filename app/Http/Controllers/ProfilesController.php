@@ -69,4 +69,11 @@ class ProfilesController extends Controller
 
         return $this->failure("Failed to update new password");
     }
+
+    public function me()
+    {
+        $user = Auth::user();
+        $user->getAllPermissions();
+        return response()->json($user);
+    }
 }
