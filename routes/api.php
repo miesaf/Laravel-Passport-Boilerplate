@@ -25,17 +25,14 @@ use App\Http\Controllers\ProfilesController;
 
 Route::post('login', [LoginController::class, 'login'])->name('login');
 Route::post('refreshToken', [LoginController::class, 'refreshToken']);
+Route::post('password/firstTime', [ProfilesController::class, 'firstTimeLogin']);
 Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
 Route::post('password/reset', [ResetPasswordController::class, 'reset']);
+Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::group(['middleware' => ['auth:api', 'forcePwdChg']], function () {
-    Route::post('logout', [LoginController::class, 'logout'])->name('logout')->withoutMiddleware('forcePwdChg');
-
     Route::group(['prefix' => 'user'], function () {
-        Route::get('/', function (Request $request) {
-            return $request->user();
-        })->withoutMiddleware('forcePwdChg');
-
+        Route::get('/', [ProfilesController::class, 'me'])->withoutMiddleware('forcePwdChg');
         Route::post('changePassword', [ProfilesController::class, 'changePassword'])->withoutMiddleware('forcePwdChg');
     });
 
