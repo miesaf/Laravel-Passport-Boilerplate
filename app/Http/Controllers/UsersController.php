@@ -25,7 +25,7 @@ class UsersController extends Controller
             return $this->forbidden();
         }
 
-        if($users = User::all()) {
+        if($users = User::orderBy('name')->get()) {
             return $this->successWithData("Success", $users);
         } else {
             return $this->failure("Failed to list users");
