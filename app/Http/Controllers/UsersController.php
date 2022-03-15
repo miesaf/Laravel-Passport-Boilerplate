@@ -69,11 +69,16 @@ class UsersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         if(!Auth::user()->can('users.view')) {
             return $this->forbidden();
         }
+
+        $request->merge(['id' => $request->route('id')]);
+        $validated = $request->validate([
+            'id' => 'required|integer',
+        ]);
 
         if($user = User::with('roles', 'roles.permissions')->with('permissions')->find($id)) {
             return $this->successWithData("Success", $user);
