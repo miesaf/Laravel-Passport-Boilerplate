@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use App\Http\Traits\ResponseTrait;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Laravel\Passport\TokenRepository;
 use Laravel\Passport\RefreshTokenRepository;
@@ -165,10 +165,25 @@ class LoginController extends Controller
 
         $getNewTokenData = $this->refreshOauthToken($request->refresh_token);
 
+        // split the token to get user_id
+        $tokenParts = explode('.', $getNewTokenData->access_token);
+        $payload = base64_decode($tokenParts[1]);
+        
+        // Logging into audit trail
+        Controller::audit_log(User::find(json_decode($payload)->sub)->user_id, $request, "auth.refreshtoken");
+
         return response()->json([
             'status'=>true,
             'message'=>'Token refreshed successfully',
-            'token'=>$getNewTokenData
+            'token' => [
+                'token_type' => $getNewTokenData->token_type,
+                'expires_in' => $getNewTokenData->expires_in,
+                'expires_on' => Carbon::now()->add($getNewTokenData->expires_in . ' seconds'),
+                'refresh_expires_in' => (int) config('app.passport_refresh_tokens_expire_in') * 60,
+                'refresh_expires_on' => Carbon::now()->add((((int) config('app.passport_refresh_tokens_expire_in')) * 60) . ' seconds'),
+                'access_token' => $getNewTokenData->access_token,
+                'refresh_token' => $getNewTokenData->refresh_token
+            ],
         ]);
     }
 
