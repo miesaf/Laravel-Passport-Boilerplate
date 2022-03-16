@@ -77,7 +77,7 @@ class PermissionSeeder extends Seeder
         $user = User::factory()->create([
             'user_id' => 'user',
             'name' => 'Example User',
-            'email' => 'User@dimensikini.xyz',
+            'email' => 'user@dimensikini.xyz',
             'password_created_at' => Carbon::now()
         ]);
         $user->assignRole($role3);
