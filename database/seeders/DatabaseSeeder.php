@@ -17,7 +17,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             PasswordPoliciesSeeder::class,
-            PermissionSeeder::class
+            PermissionSeeder::class,
+            OptionSeeder::class
         ]);
     }
 }

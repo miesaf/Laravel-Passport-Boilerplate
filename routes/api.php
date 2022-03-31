@@ -11,6 +11,7 @@ use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\ProfilesController;
+use App\Http\Controllers\OptionsController;
 use App\Http\Controllers\PasswordPoliciesController;
 use App\Http\Controllers\AuditTrailsController;
 
@@ -60,10 +61,20 @@ Route::group(['middleware' => ['auth:api', 'forcePwdChg']], function () {
         Route::delete('{id}', [UsersController::class, 'destroy']);
     });
 
+    Route::group(['prefix' => 'refCodes'], function () {
+        Route::get('/', [OptionsController::class, 'index']);
+        Route::post('/', [OptionsController::class, 'store']);
+        Route::get('detailed', [OptionsController::class, 'detailedList']);
+        Route::get('categories', [OptionsController::class, 'categoryList']);
+        Route::get('{id}', [OptionsController::class, 'show']);
+        Route::put('{id}', [OptionsController::class, 'update']);
+        Route::delete('{id}', [OptionsController::class, 'destroy']);
+    });
+
     Route::group(['prefix' => 'pwdPolicies'], function () {
         Route::get('/', [PasswordPoliciesController::class, 'index']);
         Route::get('{id}', [PasswordPoliciesController::class, 'show']);
-        Route::post('{id}/update', [PasswordPoliciesController::class, 'update']);
+        Route::delete('{id}', [PasswordPoliciesController::class, 'update']);
     });
 
     Route::group(['prefix' => 'auditTrails'], function () {
