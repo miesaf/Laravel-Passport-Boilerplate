@@ -61,7 +61,7 @@ class LoginController extends Controller
             'password' => 'required'
         ]);
 
-        // Logging into audit trail
+        // Logging into audit log
         $masked = Controller::mask_value($request);
         Controller::audit_log($request->user_id, $masked, "auth.login");
 
@@ -169,7 +169,7 @@ class LoginController extends Controller
         $tokenParts = explode('.', $getNewTokenData->access_token);
         $payload = base64_decode($tokenParts[1]);
         
-        // Logging into audit trail
+        // Logging into audit log
         Controller::audit_log(User::find(json_decode($payload)->sub)->user_id, $request, "auth.refreshtoken");
 
         return response()->json([

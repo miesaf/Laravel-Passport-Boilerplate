@@ -42,7 +42,7 @@ class ResetPasswordController extends Controller
     {
         // Validate token existance/string validity
         if($token = DB::table('password_resets')->where('token', $request->token)->first()) {
-            // Logging into audit trail
+            // Logging into audit log
             $masked = Controller::mask_value($request);
             Controller::audit_log($token->user_id, $masked, "auth.resetpwd");
 

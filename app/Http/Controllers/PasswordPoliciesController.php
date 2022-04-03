@@ -48,7 +48,7 @@ class PasswordPoliciesController extends Controller
             return $this->forbidden();
         }
 
-        // Logging into audit trail
+        // Logging into audit log
         Controller::audit_log(Auth::user()->user_id, $request, "pwdPolicies.update");
 
         $request->merge(['id' => $request->route('id')]);

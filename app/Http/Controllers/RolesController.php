@@ -42,7 +42,7 @@ class RolesController extends Controller
             return $this->forbidden();
         }
 
-        // Logging into audit trail
+        // Logging into audit log
         Controller::audit_log(Auth::user()->user_id, $request, "roles.store");
 
         $validated = $request->validate([
@@ -89,7 +89,7 @@ class RolesController extends Controller
             return $this->forbidden();
         }
 
-        // Logging into audit trail
+        // Logging into audit log
         Controller::audit_log(Auth::user()->user_id, $request, "roles.update");
 
         $validated = $request->validate([
@@ -115,7 +115,7 @@ class RolesController extends Controller
             return $this->forbidden();
         }
 
-        // Logging into audit trail
+        // Logging into audit log
         Controller::audit_log(Auth::user()->user_id, $request, "roles.delete");
 
         if((Role::find($id) != null) && Role::find($id)->delete()) {

@@ -37,7 +37,7 @@ class ForgotPasswordController extends Controller
             'user_id' => 'required'
         ]);
 
-        // Logging into audit trail
+        // Logging into audit log
         Controller::audit_log($request->user_id, $request, "auth.forgotpwd");
 
         if($user = User::where('user_id', $request->user_id)->first()) {

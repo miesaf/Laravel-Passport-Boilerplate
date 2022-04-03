@@ -226,7 +226,7 @@ class Controller extends BaseController
         $audit->category = $category;
 
         if(!$audit->save()) {
-            // Do something if audit trail logging failed
+            // Do something if audit log logging failed
             // return $this->failure("Failed to delete option");
         }
 

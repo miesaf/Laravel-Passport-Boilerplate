@@ -71,7 +71,7 @@ class OptionsController extends Controller
             return $this->forbidden();
         }
 
-        // Logging into audit trail
+        // Logging into audit log
         Controller::audit_log(Auth::user()->user_id, $request, "options.store");
 
         $validated = $request->validate([
@@ -121,7 +121,7 @@ class OptionsController extends Controller
             return $this->forbidden();
         }
 
-        // Logging into audit trail
+        // Logging into audit log
         Controller::audit_log(Auth::user()->user_id, $request, "options.update");
 
         $validated = $request->validate([
@@ -153,7 +153,7 @@ class OptionsController extends Controller
             return $this->forbidden();
         }
 
-        // Logging into audit trail
+        // Logging into audit log
         Controller::audit_log(Auth::user()->user_id, $request, "options.delete");
 
         if((Option::find($id) != null) && Option::find($id)->delete()) {

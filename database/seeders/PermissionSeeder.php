@@ -52,6 +52,9 @@ class PermissionSeeder extends Seeder
         $role1->givePermissionTo('users.*');
 
         $role2 = Role::create(['name' => 'Moderator', 'guard_name' => 'api']);
+        $role2->givePermissionTo('users.list');
+        $role2->givePermissionTo('users.view');
+
         $role3 = Role::create(['name' => 'User', 'guard_name' => 'api']);
 
         // create demo users

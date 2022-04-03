@@ -46,7 +46,7 @@ class PermissionsController extends Controller
             'name' => 'required|unique:permissions|max:255'
         ]);
 
-        // Logging into audit trail
+        // Logging into audit log
         Controller::audit_log(Auth::user()->user_id, $request, "permissions.store");
 
         if(Permission::create(['name'=>$request->name, 'guard_name'=>'api'])) {
@@ -68,7 +68,7 @@ class PermissionsController extends Controller
             return $this->forbidden();
         }
 
-        // Logging into audit trail
+        // Logging into audit log
         Controller::audit_log(Auth::user()->user_id, $request, "permissions.destroy");
 
         if((Permission::find($id) != null) && Permission::find($id)->delete()) {

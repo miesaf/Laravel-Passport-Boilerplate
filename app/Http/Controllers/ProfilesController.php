@@ -26,7 +26,7 @@ class ProfilesController extends Controller
             'new_password' => 'required'
         ]);
 
-        // Logging into audit trail
+        // Logging into audit log
         $masked = Controller::mask_value($request);
         Controller::audit_log($request->user_id, $masked, "auth.firstlogin");
 
@@ -89,7 +89,7 @@ class ProfilesController extends Controller
             'new_password' => 'required'
         ]);
 
-        // Logging into audit trail
+        // Logging into audit log
         $masked = Controller::mask_value($request);
         Controller::audit_log(Auth::user()->user_id, $masked, "auth.chgpwd");
 

@@ -44,13 +44,13 @@ class UsersController extends Controller
             return $this->forbidden();
         }
 
-        // Logging into audit trail
+        // Logging into audit log
         Controller::audit_log(Auth::user()->user_id, $request, "users.store");
 
         $validated = $request->validate([
-            'user_id' => 'required|unique:users,user_id,NULL,id,deleted_at,NULL',
+            'user_id' => 'required|unique:users,user_id,NULL,id',
             'name' => 'required|string',
-            'email' => 'required|email|unique:users,email,NULL,id,deleted_at,NULL',
+            'email' => 'required|email|unique:users,email,NULL,id',
             'roles' => 'required|array|exists:roles,name',
             'permissions' => 'array|exists:permissions,name',
             'status' => 'required|boolean'
@@ -100,7 +100,7 @@ class UsersController extends Controller
             return $this->forbidden();
         }
 
-        // Logging into audit trail
+        // Logging into audit log
         Controller::audit_log(Auth::user()->user_id, $request, "users.update");
 
         $request->merge(['id' => $request->route('id')]);
@@ -139,7 +139,7 @@ class UsersController extends Controller
             return $this->forbidden();
         }
 
-        // Logging into audit trail
+        // Logging into audit log
         Controller::audit_log(Auth::user()->user_id, $request, "users.delete");
 
         $request->merge(['id' => $request->route('id')]);
