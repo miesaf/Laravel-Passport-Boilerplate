@@ -12,7 +12,7 @@ class AuditLogsController extends Controller
 {
     use ResponseTrait;
 
-    public function __construct(AuditLog $auditTrail) {
+    public function __construct(AuditLog $auditLog) {
         $this->auditLog = $auditLog;
     }
 

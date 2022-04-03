@@ -9,7 +9,7 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Routing\Controller as BaseController;
 use App\Models\PasswordPolicy;
 use App\Models\PasswordHistory;
-use App\Models\AuditTrail;
+use App\Models\AuditLog;
 use App\Models\User;
 use Carbon\Carbon;
 use Hash;
@@ -218,7 +218,7 @@ class Controller extends BaseController
     public function audit_log($user_id, $vardata, $category)
     {
         $now = Carbon::now();
-        $audit = new AuditTrail;
+        $audit = new AuditLog;
 
         $audit->user_id = $user_id;
         $audit->req_time = $now;
