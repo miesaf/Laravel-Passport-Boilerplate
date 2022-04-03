@@ -13,7 +13,7 @@ use App\Http\Controllers\UsersController;
 use App\Http\Controllers\ProfilesController;
 use App\Http\Controllers\OptionsController;
 use App\Http\Controllers\PasswordPoliciesController;
-use App\Http\Controllers\AuditTrailsController;
+use App\Http\Controllers\AuditLogsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,9 +77,9 @@ Route::group(['middleware' => ['auth:api', 'forcePwdChg']], function () {
         Route::delete('{id}', [PasswordPoliciesController::class, 'update']);
     });
 
-    Route::group(['prefix' => 'auditTrails'], function () {
-        Route::get('/', [AuditTrailsController::class, 'index']);
-        Route::post('search', [AuditTrailsController::class, 'search']);
-        Route::get('{id}', [AuditTrailsController::class, 'show']);
+    Route::group(['prefix' => 'auditLogs'], function () {
+        Route::get('/', [AuditLogsController::class, 'index']);
+        Route::post('search', [AuditLogsController::class, 'search']);
+        Route::get('{id}', [AuditLogsController::class, 'show']);
     });
 });

@@ -40,6 +40,11 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'users.update', 'guard_name' => 'api']);
         Permission::create(['name' => 'users.delete', 'guard_name' => 'api']);
 
+        // create 'Audit Logs' permissions
+        Permission::create(['name' => 'auditLogs.*', 'guard_name' => 'api']);
+        Permission::create(['name' => 'auditLogs.list', 'guard_name' => 'api']);
+        Permission::create(['name' => 'auditLogs.view', 'guard_name' => 'api']);
+
         // create roles and assign existing permissions
         $role1 = Role::create(['name' => 'Admin', 'guard_name' => 'api']);
         $role1->givePermissionTo('permissions.*');

@@ -4,16 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Traits\ResponseTrait;
-use App\Models\AuditTrail;
+use App\Models\AuditLog;
 use Carbon\Carbon;
 use Auth;
 
-class AuditTrailsController extends Controller
+class AuditLogsController extends Controller
 {
     use ResponseTrait;
 
-    public function __construct(AuditTrail $auditTrail) {
-        $this->auditTrail = $auditTrail;
+    public function __construct(AuditLog $auditTrail) {
+        $this->auditLog = $auditLog;
     }
 
     /**
@@ -23,19 +23,19 @@ class AuditTrailsController extends Controller
      */
     public function index()
     {
-        if(!Auth::user()->can('auditTrails.list')) {
+        if(!Auth::user()->can('auditLogs.list')) {
             return $this->forbidden();
         }
 
-        if($auditTrails = AuditTrail::select('id', 'user_id', 'req_time', 'category')->orderBy('id', 'desc')->get()) {
-            return $this->successWithData("Success", $auditTrails);
+        if($auditLogs = AuditLog::select('id', 'user_id', 'req_time', 'category')->orderBy('id', 'desc')->get()) {
+            return $this->successWithData("Success", $auditLogs);
         } else {
-            return $this->failure("Failed to list audit trails");
+            return $this->failure("Failed to list audit logs");
         }
     }
 
     public function search(Request $request) {
-        if(!Auth::user()->can('auditTrails.list')) {
+        if(!Auth::user()->can('auditLogs.list')) {
             return $this->forbidden();
         }
 
@@ -45,7 +45,7 @@ class AuditTrailsController extends Controller
             'vardata' => 'string',
         ]);
 
-        $search = $this->auditTrail->select('id', 'user_id', 'req_time', 'category');
+        $search = $this->auditLog->select('id', 'user_id', 'req_time', 'category');
 
         if($request->start_date) {
             $search->where('req_time', '>=', Carbon::createFromTimeString($request->start_date, 'UTC')->setTimezone(config('app.timezone'))->format('Y-m-d') . ' 00:00:00');
@@ -61,10 +61,10 @@ class AuditTrailsController extends Controller
 
         $search->orderBy('id', 'desc');
 
-        if($auditTrails = $search->get()) {
-            return $this->successWithData("Success", $auditTrails);
+        if($auditLogs = $search->get()) {
+            return $this->successWithData("Success", $auditLogs);
         } else {
-            return $this->failure("Failed to search audit trails");
+            return $this->failure("Failed to search audit logs");
         }
     }
 
@@ -76,7 +76,7 @@ class AuditTrailsController extends Controller
      */
     public function show(Request $request, $id)
     {
-        if(!Auth::user()->can('auditTrails.view')) {
+        if(!Auth::user()->can('auditLogs.view')) {
             return $this->forbidden();
         }
 
@@ -85,10 +85,10 @@ class AuditTrailsController extends Controller
             'id' => 'required|integer',
         ]);
 
-        if($auditTrail = AuditTrail::find($id)) {
-            return $this->successWithData("Success", $auditTrail);
+        if($auditLog = AuditLog::find($id)) {
+            return $this->successWithData("Success", $auditLog);
         } else {
-            return $this->failure("Failed to view audit trail record", 404);
+            return $this->failure("Failed to view audit log record", 404);
         }
     }
 }
