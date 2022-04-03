@@ -16,17 +16,15 @@ class OptionsController extends Controller
     public function index()
     {
         try {
-            $roles = Role::select('id as code', 'name as display')->get();
-            $permissions = Permission::select('id as code', 'name as display')->get();
+            $roles = Role::select('id as value', 'name as text')->get();
+            $permissions = Permission::select('id as value', 'name as text')->get();
 
-            if($options = Option::select('id', 'category', 'code', 'display', 'flag')->get()) {
+            if($options = Option::select('id', 'category', 'code as value', 'display as text', 'flag')->get()) {
                 $optionsObj = $options->groupBy('category');
                 $optionsObj = json_encode($optionsObj);
                 $optionsObj = json_decode($optionsObj);
                 $optionsObj->roles = $roles;
                 $optionsObj->permissions = $permissions;
-                $optionsObj->companies = $companies;
-                $optionsObj->transporters = $transporters;
 
                 return $this->successWithData("Success", $optionsObj);
             } else {
