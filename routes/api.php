@@ -61,7 +61,7 @@ Route::group(['middleware' => ['auth:api', 'forcePwdChg']], function () {
         Route::delete('{id}', [UsersController::class, 'destroy']);
     });
 
-    Route::group(['prefix' => 'refCodes'], function () {
+    Route::group(['prefix' => 'options'], function () {
         Route::get('/', [OptionsController::class, 'index']);
         Route::post('/', [OptionsController::class, 'store']);
         Route::get('detailed', [OptionsController::class, 'detailedList']);
