@@ -32,6 +32,12 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'roles.update', 'guard_name' => 'api']);
         Permission::create(['name' => 'roles.delete', 'guard_name' => 'api']);
 
+        // create 'Options' permissions
+        Permission::create(['name' => 'options.*', 'guard_name' => 'api']);
+        Permission::create(['name' => 'options.list', 'guard_name' => 'api']);
+        Permission::create(['name' => 'options.add', 'guard_name' => 'api']);
+        Permission::create(['name' => 'options.update', 'guard_name' => 'api']);
+
         // create 'Users' permissions
         Permission::create(['name' => 'users.*', 'guard_name' => 'api']);
         Permission::create(['name' => 'users.list', 'guard_name' => 'api']);
@@ -50,6 +56,8 @@ class PermissionSeeder extends Seeder
         $role1->givePermissionTo('permissions.*');
         $role1->givePermissionTo('roles.*');
         $role1->givePermissionTo('users.*');
+        $role1->givePermissionTo('options.*');
+        $role1->givePermissionTo('auditLogs.*');
 
         $role2 = Role::create(['name' => 'Moderator', 'guard_name' => 'api']);
         $role2->givePermissionTo('users.list');

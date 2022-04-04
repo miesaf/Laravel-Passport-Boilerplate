@@ -81,7 +81,7 @@ class OptionsController extends Controller
         ]);
 
         if($option = Option::create($validated)) {
-            return $this->successWithID("Success", $option->id);
+            return $this->successWithID("Option created successfully", $option->id);
         } else {
             return $this->failure("Failed to create option");
         }
