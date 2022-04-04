@@ -74,7 +74,7 @@ Route::group(['middleware' => ['auth:api', 'forcePwdChg']], function () {
     Route::group(['prefix' => 'pwdPolicies'], function () {
         Route::get('/', [PasswordPoliciesController::class, 'index']);
         Route::get('{id}', [PasswordPoliciesController::class, 'show']);
-        Route::delete('{id}', [PasswordPoliciesController::class, 'update']);
+        Route::put('{id}', [PasswordPoliciesController::class, 'update']);
     });
 
     Route::group(['prefix' => 'auditLogs'], function () {
