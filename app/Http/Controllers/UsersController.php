@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Http\Traits\ResponseTrait;
 use App\Models\User;
 use Auth;
-use Str;
+use Illuminate\Http\Request;
 
 class UsersController extends Controller
 {
@@ -21,14 +18,14 @@ class UsersController extends Controller
      */
     public function index()
     {
-        if(!Auth::user()->can('users.list')) {
+        if (! Auth::user()->can('users.list')) {
             return $this->forbidden();
         }
 
-        if($users = User::orderBy('name')->get()) {
-            return $this->successWithData("Success", $users);
+        if ($users = User::orderBy('name')->get()) {
+            return $this->successWithData('Success', $users);
         } else {
-            return $this->failure("Failed to list users");
+            return $this->failure('Failed to list users');
         }
     }
 
@@ -40,12 +37,12 @@ class UsersController extends Controller
      */
     public function store(Request $request)
     {
-        if(!Auth::user()->can('users.add')) {
+        if (! Auth::user()->can('users.add')) {
             return $this->forbidden();
         }
 
         // Logging into audit log
-        Controller::audit_log(Auth::user()->user_id, $request, "users.store");
+        Controller::audit_log(Auth::user()->user_id, $request, 'users.store');
 
         $validated = $request->validate([
             'user_id' => 'required|unique:users,user_id,NULL,id',
@@ -53,13 +50,13 @@ class UsersController extends Controller
             'email' => 'required|email|unique:users,email,NULL,id',
             'roles' => 'required|array|exists:roles,name',
             'permissions' => 'array|exists:permissions,name',
-            'status' => 'required|boolean'
+            'status' => 'required|boolean',
         ]);
 
-        if(User::create($validated)->assignRole($request->roles)->givePermissionTo($request->permissions)) {
-            return $this->success("User registered successfully");
+        if (User::create($validated)->assignRole($request->roles)->givePermissionTo($request->permissions)) {
+            return $this->success('User registered successfully');
         } else {
-            return $this->failure("Failed to register user");
+            return $this->failure('Failed to register user');
         }
     }
 
@@ -71,7 +68,7 @@ class UsersController extends Controller
      */
     public function show(Request $request, $id)
     {
-        if(!Auth::user()->can('users.view')) {
+        if (! Auth::user()->can('users.view')) {
             return $this->forbidden();
         }
 
@@ -80,10 +77,10 @@ class UsersController extends Controller
             'id' => 'required|integer',
         ]);
 
-        if($user = User::with('roles', 'roles.permissions')->with('permissions')->find($id)) {
-            return $this->successWithData("Success", $user);
+        if ($user = User::with('roles', 'roles.permissions')->with('permissions')->find($id)) {
+            return $this->successWithData('Success', $user);
         } else {
-            return $this->failure("Failed to retrieve user");
+            return $this->failure('Failed to retrieve user');
         }
     }
 
@@ -96,34 +93,34 @@ class UsersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if(!Auth::user()->can('users.update')) {
+        if (! Auth::user()->can('users.update')) {
             return $this->forbidden();
         }
 
         // Logging into audit log
-        Controller::audit_log(Auth::user()->user_id, $request, "users.update");
+        Controller::audit_log(Auth::user()->user_id, $request, 'users.update');
 
         $request->merge(['id' => $request->route('id')]);
         $validated = $request->validate([
             'id' => 'required|integer',
-            'user_id' => 'required|unique:users,user_id,' . $id,
+            'user_id' => 'required|unique:users,user_id,'.$id,
             'name' => 'required|string',
-            'email' => 'required|email|unique:users,email,' . $id,
+            'email' => 'required|email|unique:users,email,'.$id,
             'roles' => 'required|array|exists:roles,name',
             'permissions' => 'array|exists:permissions,name',
-            'status' => 'required|boolean'
+            'status' => 'required|boolean',
         ]);
 
         $validated['is_active'] = $validated['status'];
 
-        if($user = User::find($id)) {
+        if ($user = User::find($id)) {
             $user->update($validated);
             $user->syncRoles($request->roles);
             $user->syncPermissions($request->permissions);
 
-            return $this->success("User updated successfully");
+            return $this->success('User updated successfully');
         } else {
-            return $this->failure("Failed to update user");
+            return $this->failure('Failed to update user');
         }
     }
 
@@ -135,22 +132,22 @@ class UsersController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        if(!Auth::user()->can('users.delete')) {
+        if (! Auth::user()->can('users.delete')) {
             return $this->forbidden();
         }
 
         // Logging into audit log
-        Controller::audit_log(Auth::user()->user_id, $request, "users.delete");
+        Controller::audit_log(Auth::user()->user_id, $request, 'users.delete');
 
         $request->merge(['id' => $request->route('id')]);
         $validated = $request->validate([
             'id' => 'required|integer',
         ]);
 
-        if((User::find($id) != null) && User::find($id)->delete()) {
-            return $this->success("User deleted successfully");
+        if ((User::find($id) != null) && User::find($id)->delete()) {
+            return $this->success('User deleted successfully');
         } else {
-            return $this->failure("Failed to delete user");
+            return $this->failure('Failed to delete user');
         }
     }
 }

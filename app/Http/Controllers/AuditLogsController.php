@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Traits\ResponseTrait;
 use App\Models\AuditLog;
-use Carbon\Carbon;
 use Auth;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class AuditLogsController extends Controller
 {
     use ResponseTrait;
 
-    public function __construct(AuditLog $auditLog) {
+    public function __construct(AuditLog $auditLog)
+    {
         $this->auditLog = $auditLog;
     }
 
@@ -23,19 +24,20 @@ class AuditLogsController extends Controller
      */
     public function index()
     {
-        if(!Auth::user()->can('auditLogs.list')) {
+        if (! Auth::user()->can('auditLogs.list')) {
             return $this->forbidden();
         }
 
-        if($auditLogs = AuditLog::select('id', 'user_id', 'req_time', 'category')->orderBy('id', 'desc')->get()) {
-            return $this->successWithData("Success", $auditLogs);
+        if ($auditLogs = AuditLog::select('id', 'user_id', 'req_time', 'category')->orderBy('id', 'desc')->get()) {
+            return $this->successWithData('Success', $auditLogs);
         } else {
-            return $this->failure("Failed to list audit logs");
+            return $this->failure('Failed to list audit logs');
         }
     }
 
-    public function search(Request $request) {
-        if(!Auth::user()->can('auditLogs.list')) {
+    public function search(Request $request)
+    {
+        if (! Auth::user()->can('auditLogs.list')) {
             return $this->forbidden();
         }
 
@@ -47,24 +49,24 @@ class AuditLogsController extends Controller
 
         $search = $this->auditLog->select('id', 'user_id', 'req_time', 'category');
 
-        if($request->start_date) {
-            $search->where('req_time', '>=', Carbon::createFromTimeString($request->start_date, 'UTC')->setTimezone(config('app.timezone'))->format('Y-m-d') . ' 00:00:00');
+        if ($request->start_date) {
+            $search->where('req_time', '>=', Carbon::createFromTimeString($request->start_date, 'UTC')->setTimezone(config('app.timezone'))->format('Y-m-d').' 00:00:00');
         }
 
-        if($request->end_date) {
-            $search->where('req_time', '<=', Carbon::createFromTimeString($request->end_date, 'UTC')->setTimezone(config('app.timezone'))->format('Y-m-d') . ' 23:59:59');
+        if ($request->end_date) {
+            $search->where('req_time', '<=', Carbon::createFromTimeString($request->end_date, 'UTC')->setTimezone(config('app.timezone'))->format('Y-m-d').' 23:59:59');
         }
 
-        if($request->vardata) {
-            $search->where('vardata', 'LIKE', '%' . $request->vardata . '%');
+        if ($request->vardata) {
+            $search->where('vardata', 'LIKE', '%'.$request->vardata.'%');
         }
 
         $search->orderBy('id', 'desc');
 
-        if($auditLogs = $search->get()) {
-            return $this->successWithData("Success", $auditLogs);
+        if ($auditLogs = $search->get()) {
+            return $this->successWithData('Success', $auditLogs);
         } else {
-            return $this->failure("Failed to search audit logs");
+            return $this->failure('Failed to search audit logs');
         }
     }
 
@@ -76,7 +78,7 @@ class AuditLogsController extends Controller
      */
     public function show(Request $request, $id)
     {
-        if(!Auth::user()->can('auditLogs.view')) {
+        if (! Auth::user()->can('auditLogs.view')) {
             return $this->forbidden();
         }
 
@@ -85,10 +87,10 @@ class AuditLogsController extends Controller
             'id' => 'required|integer',
         ]);
 
-        if($auditLog = AuditLog::find($id)) {
-            return $this->successWithData("Success", $auditLog);
+        if ($auditLog = AuditLog::find($id)) {
+            return $this->successWithData('Success', $auditLog);
         } else {
-            return $this->failure("Failed to view audit log record", 404);
+            return $this->failure('Failed to view audit log record', 404);
         }
     }
 }

@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use Carbon\Carbon;
 use DB;
+use Illuminate\Database\Seeder;
 
 class OptionSeeder extends Seeder
 {

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Http\Traits\ResponseTrait;
 use App\Models\Option;
 use Auth;
+use Illuminate\Http\Request;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class OptionsController extends Controller
 {
@@ -19,41 +19,41 @@ class OptionsController extends Controller
             $roles = Role::select('id as value', 'name as text')->get();
             $permissions = Permission::select('id as value', 'name as text')->get();
 
-            if($options = Option::select('id', 'category', 'code as value', 'display as text', 'flag')->get()) {
+            if ($options = Option::select('id', 'category', 'code as value', 'display as text', 'flag')->get()) {
                 $optionsObj = $options->groupBy('category');
                 $optionsObj = json_encode($optionsObj);
                 $optionsObj = json_decode($optionsObj);
                 $optionsObj->roles = $roles;
                 $optionsObj->permissions = $permissions;
 
-                return $this->successWithData("Success", $optionsObj);
+                return $this->successWithData('Success', $optionsObj);
             } else {
-                return $this->failure("Failed to list reference codes");
+                return $this->failure('Failed to list reference codes');
             }
         } catch (\Exception $e) {
-            return $this->failure("Failed to list all reference codes");
+            return $this->failure('Failed to list all reference codes');
         }
     }
 
     public function detailedList()
     {
-        if(!Auth::user()->can('options.list')) {
+        if (! Auth::user()->can('options.list')) {
             return $this->forbidden();
         }
 
-        if($options = Option::orderBy('category')->orderBy('code')->get()) {
-            return $this->successWithData("Success", $options);
+        if ($options = Option::orderBy('category')->orderBy('code')->get()) {
+            return $this->successWithData('Success', $options);
         } else {
-            return $this->failure("Failed to list reference codes");
+            return $this->failure('Failed to list reference codes');
         }
     }
 
     public function categoryList()
     {
-        if($options = Option::distinct()->pluck('category')->toArray()) {
-            return $this->successWithData("Success", $options);
+        if ($options = Option::distinct()->pluck('category')->toArray()) {
+            return $this->successWithData('Success', $options);
         } else {
-            return $this->failure("Failed to list reference code categories");
+            return $this->failure('Failed to list reference code categories');
         }
     }
 
@@ -65,25 +65,25 @@ class OptionsController extends Controller
      */
     public function store(Request $request)
     {
-        if(!Auth::user()->can('options.add')) {
+        if (! Auth::user()->can('options.add')) {
             return $this->forbidden();
         }
 
         // Logging into audit log
-        Controller::audit_log(Auth::user()->user_id, $request, "options.store");
+        Controller::audit_log(Auth::user()->user_id, $request, 'options.store');
 
         $validated = $request->validate([
             'category' => 'required|string',
             'code' => 'required|string',
             'display' => 'required|string',
             'description' => 'nullable|string',
-            'flag' => 'nullable|string|max:5'
+            'flag' => 'nullable|string|max:5',
         ]);
 
-        if($option = Option::create($validated)) {
-            return $this->successWithID("Option created successfully", $option->id);
+        if ($option = Option::create($validated)) {
+            return $this->successWithID('Option created successfully', $option->id);
         } else {
-            return $this->failure("Failed to create option");
+            return $this->failure('Failed to create option');
         }
     }
 
@@ -95,14 +95,14 @@ class OptionsController extends Controller
      */
     public function show($id)
     {
-        if(!Auth::user()->can('options.view')) {
+        if (! Auth::user()->can('options.view')) {
             return $this->forbidden();
         }
 
-        if($options = Option::find($id)) {
-            return $this->successWithData("Success", $options);
+        if ($options = Option::find($id)) {
+            return $this->successWithData('Success', $options);
         } else {
-            return $this->failure("Failed to list reference codes", 404);
+            return $this->failure('Failed to list reference codes', 404);
         }
     }
 
@@ -115,27 +115,27 @@ class OptionsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if(!Auth::user()->can('options.update')) {
+        if (! Auth::user()->can('options.update')) {
             return $this->forbidden();
         }
 
         // Logging into audit log
-        Controller::audit_log(Auth::user()->user_id, $request, "options.update");
+        Controller::audit_log(Auth::user()->user_id, $request, 'options.update');
 
         $validated = $request->validate([
             'category' => 'required|string',
             'code' => 'required|string',
             'display' => 'required|string',
             'description' => 'nullable|string',
-            'flag' => 'nullable|string|max:5'
+            'flag' => 'nullable|string|max:5',
         ]);
 
-        if($user = Option::find($id)) {
+        if ($user = Option::find($id)) {
             $user->update($validated);
 
-            return $this->successWithID("Option updated successfully", $id);
+            return $this->successWithID('Option updated successfully', $id);
         } else {
-            return $this->failure("Failed to update option");
+            return $this->failure('Failed to update option');
         }
     }
 
@@ -147,17 +147,17 @@ class OptionsController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        if(!Auth::user()->can('options.delete')) {
+        if (! Auth::user()->can('options.delete')) {
             return $this->forbidden();
         }
 
         // Logging into audit log
-        Controller::audit_log(Auth::user()->user_id, $request, "options.delete");
+        Controller::audit_log(Auth::user()->user_id, $request, 'options.delete');
 
-        if((Option::find($id) != null) && Option::find($id)->delete()) {
-            return $this->success("Option deleted successfully");
+        if ((Option::find($id) != null) && Option::find($id)->delete()) {
+            return $this->success('Option deleted successfully');
         } else {
-            return $this->failure("Failed to delete option");
+            return $this->failure('Failed to delete option');
         }
     }
 }
