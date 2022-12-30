@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ResponseTrait;
+use App\Models\PasswordHistory;
+use App\Models\PasswordPolicy;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use Carbon\Carbon;
+use DB;
+use Hash;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Request;
-use App\Http\Traits\ResponseTrait;
-use App\Models\User;
-use App\Models\PasswordPolicy;
-use App\Models\PasswordHistory;
-use Carbon\Carbon;
-use Hash;
-use DB;
 
 class ResetPasswordController extends Controller
 {
@@ -41,20 +41,20 @@ class ResetPasswordController extends Controller
     public function reset(Request $request)
     {
         // Validate token existance/string validity
-        if($token = DB::table('password_resets')->where('token', $request->token)->first()) {
+        if ($token = DB::table('password_resets')->where('token', $request->token)->first()) {
             // Logging into audit log
             $masked = Controller::mask_value($request);
-            Controller::audit_log($token->user_id, $masked, "auth.resetpwd");
+            Controller::audit_log($token->user_id, $masked, 'auth.resetpwd');
 
             $T_now = Carbon::now();
             $T_created = Carbon::createFromTimeString($token->created_at);
 
             // Validate token time frame validity
-            if($T_now->diffInMinutes($T_created) < 60) {
+            if ($T_now->diffInMinutes($T_created) < 60) {
                 // Check User ID exixtance
-                if($user = DB::table('users')->where('user_id', $token->user_id)->first()) {
+                if ($user = DB::table('users')->where('user_id', $token->user_id)->first()) {
                     // Validate password policy
-                    if($pword_policy = Controller::password_policy_check($user->user_id, $request->new_password)) {
+                    if ($pword_policy = Controller::password_policy_check($user->user_id, $request->new_password)) {
                         return response()->json($pword_policy);
                     }
 
@@ -67,17 +67,17 @@ class ResetPasswordController extends Controller
                                 'password' => Hash::make($request->new_password),
                                 'password_created_at' => Carbon::now(),
                                 'is_force_change' => 0,
-                                'failed_attempts' => 0
+                                'failed_attempts' => 0,
                             ]);
 
                         PasswordHistory::create([
                             'user_id' => $user->user_id,
-                            'password' => bcrypt($request->new_password)
+                            'password' => bcrypt($request->new_password),
                         ]);
 
                         // Password cycle policy
                         $policy = PasswordPolicy::find(16);
-                        if($policy->status) {
+                        if ($policy->status) {
                             $policy_value = $policy->value;
                         } else {
                             $policy_value = 1;
@@ -90,23 +90,24 @@ class ResetPasswordController extends Controller
 
                         DB::commit();
 
-                        return $this->success("Password changed successfully");
+                        return $this->success('Password changed successfully');
                     } catch (\Exception $e) {
                         DB::rollBack();
-                        return $this->failure("Failed to save new password.");
+
+                        return $this->failure('Failed to save new password.');
                     }
 
                     DB::rollBack();
 
-                    $err_msg = "Failed to save new password.";
+                    $err_msg = 'Failed to save new password.';
                 } else {
-                    $err_msg = "User ID not found.";
+                    $err_msg = 'User ID not found.';
                 }
             } else {
-                $err_msg = "Reset password link has expired.";
+                $err_msg = 'Reset password link has expired.';
             }
         } else {
-            $err_msg = "Reset password link is invalid.";
+            $err_msg = 'Reset password link is invalid.';
         }
 
         return $this->failure($err_msg);

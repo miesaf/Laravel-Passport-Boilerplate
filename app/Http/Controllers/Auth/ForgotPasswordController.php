@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
-// use Illuminate\Validation\Rules\Password;
-use Illuminate\Http\Request;
 use App\Http\Traits\ResponseTrait;
+// use Illuminate\Validation\Rules\Password;
 use App\Mail\APIResetPassword;
 use App\Models\User;
 use Carbon\Carbon;
+use DB;
+use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
+use Illuminate\Http\Request;
 use Mail;
 use Str;
-use DB;
 
 class ForgotPasswordController extends Controller
 {
@@ -34,19 +34,19 @@ class ForgotPasswordController extends Controller
     public function sendResetLinkEmail(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required'
+            'user_id' => 'required',
         ]);
 
         // Logging into audit log
-        Controller::audit_log($request->user_id, $request, "auth.forgotpwd");
+        Controller::audit_log($request->user_id, $request, 'auth.forgotpwd');
 
-        if($user = User::where('user_id', $request->user_id)->first()) {
-            if(!$user->is_active) {
-                return $this->failure("Your account was deactivated. Please contact system administrator to reactivate your account.");
+        if ($user = User::where('user_id', $request->user_id)->first()) {
+            if (! $user->is_active) {
+                return $this->failure('Your account was deactivated. Please contact system administrator to reactivate your account.');
             }
 
-            if(!$user->email) {
-                return $this->failure("Email was not defined.");
+            if (! $user->email) {
+                return $this->failure('Email was not defined.');
             }
 
             $token = Str::random(60);
@@ -56,22 +56,22 @@ class ForgotPasswordController extends Controller
                 ['token' => $token, 'created_at' => Carbon::now()]
             );
 
-            $reset = (object) array();
+            $reset = (object) [];
 
-            $reset->link = config('app.url_fe') . "/password/reset/$token";
+            $reset->link = config('app.url_fe')."/password/reset/$token";
             $reset->appName = config('app.name');
             $reset->appURL = config('app.url_fe');
             $reset->userName = $user->name;
 
             Mail::to($user->email)->send(new APIResetPassword($reset));
 
-            if(Mail::failures()) {
-                return $this->failure("Failed to send reset link email.");
+            if (Mail::failures()) {
+                return $this->failure('Failed to send reset link email.');
             } else {
-                return $this->success("Please check your email for reset link.");
+                return $this->success('Please check your email for reset link.');
             }
         } else {
-            return $this->failure("User ID not found");
+            return $this->failure('User ID not found');
         }
     }
 }

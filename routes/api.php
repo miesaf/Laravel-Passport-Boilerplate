@@ -1,19 +1,17 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\AuditLogsController;
 // Import your controllers
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\PermissionsController;
-use App\Http\Controllers\RolesController;
-use App\Http\Controllers\UsersController;
-use App\Http\Controllers\ProfilesController;
 use App\Http\Controllers\OptionsController;
 use App\Http\Controllers\PasswordPoliciesController;
-use App\Http\Controllers\AuditLogsController;
+use App\Http\Controllers\PermissionsController;
+use App\Http\Controllers\ProfilesController;
+use App\Http\Controllers\RolesController;
+use App\Http\Controllers\UsersController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------

@@ -14,6 +14,6 @@ class Option extends Model
         'code',
         'display',
         'description',
-        'flag'
+        'flag',
     ];
 }

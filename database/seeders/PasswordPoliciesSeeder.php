@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\PasswordPolicy;
+use Illuminate\Database\Seeder;
 
 class PasswordPoliciesSeeder extends Seeder
 {

@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\PasswordHistory;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use App\Models\User;
-use App\Models\PasswordHistory;
-use Carbon\Carbon;
 
 class PermissionSeeder extends Seeder
 {
@@ -78,36 +78,36 @@ class PermissionSeeder extends Seeder
             'user_id' => 'admin',
             'name' => 'Example Admin',
             'email' => 'admin@dimensikini.xyz',
-            'password_created_at' => Carbon::now()
+            'password_created_at' => Carbon::now(),
         ]);
         $user->assignRole($role1);
         PasswordHistory::factory()->create([
             'user_id' => $user->user_id,
-            'password' => $user->password
+            'password' => $user->password,
         ]);
 
         $user = User::factory()->create([
             'user_id' => 'moderator',
             'name' => 'Example Moderator',
             'email' => 'moderator@dimensikini.xyz',
-            'password_created_at' => Carbon::now()
+            'password_created_at' => Carbon::now(),
         ]);
         $user->assignRole($role2);
         PasswordHistory::factory()->create([
             'user_id' => $user->user_id,
-            'password' => $user->password
+            'password' => $user->password,
         ]);
 
         $user = User::factory()->create([
             'user_id' => 'user',
             'name' => 'Example User',
             'email' => 'user@dimensikini.xyz',
-            'password_created_at' => Carbon::now()
+            'password_created_at' => Carbon::now(),
         ]);
         $user->assignRole($role3);
         PasswordHistory::factory()->create([
             'user_id' => $user->user_id,
-            'password' => $user->password
+            'password' => $user->password,
         ]);
     }
 }
