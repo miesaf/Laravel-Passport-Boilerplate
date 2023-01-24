@@ -133,6 +133,9 @@ return [
     |
     */
 
+    'passport_personal_access_client_id' => env('PASSPORT_PERSONAL_ACCESS_CLIENT_ID'),
+    'passport_personal_access_client_secret' => env('PASSPORT_PERSONAL_ACCESS_CLIENT_SECRET'),
+    'passport_personal_access_tokens_expire_in' => env('PASSPORT_PERSONAL_ACCESS_TOKENS_EXPIRE_IN'),
     'passport_login_endpoint' => env('PASSPORT_LOGIN_ENDPOINT'),
     'passport_client_id' => env('PASSPORT_CLIENT_ID'),
     'passport_client_secret' => env('PASSPORT_CLIENT_SECRET'),

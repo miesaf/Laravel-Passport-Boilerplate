@@ -61,6 +61,12 @@ class LoginController extends Controller
             'password' => 'required'
         ]);
 
+        $validated2 = $request->validate([
+            'pat' => 'nullable|boolean',
+        ]);
+
+        $responseMsg = "Login successful";
+
         // Logging into audit log
         $masked = Controller::mask_value($request);
         Controller::audit_log($request->user_id, $masked, "auth.login");
@@ -88,6 +94,11 @@ class LoginController extends Controller
                     return response()->json($account_dormant_check);
                 }
 
+                // Check password force change
+                if(Auth::user()->is_force_change) {
+                    $responseMsg = "Your password has expired. Please change your password.";
+                }
+
                 // Check all account flags
                 if(!Auth::user()->is_active) {
                     return $this->failure("Your account was deactivated", 200);
@@ -97,20 +108,33 @@ class LoginController extends Controller
                     return $this->failure("Your account was locked", 200);
                 }
 
-                if(($getTokenData = $this->getOauthTokenData($request->user_id, $request->password)) && isset($getTokenData->access_token)) {
+                if($request->pat) {
+                    $getTokenData = Auth::user()->createToken("User " . Auth::user()->id . " Mobile PAT");
+                } else {
+                    $getTokenData = $this->getOauthTokenData($request->user_id, $request->password);
+                }
+
+                if(isset($getTokenData->access_token) || isset($getTokenData->accessToken)) {
                     // Log current login
                     Auth::user()->update([
                         'current_signin' => Carbon::now(),
                         'last_signin' => Auth::user()->current_signin
                     ]);
 
-                    $userInfo = User::where('user_id', $request->user_id)->first();
+                    $userInfo = User::with('client.addresses')->with('driver')->find(Auth::user()->id);
                     $userInfo->getAllPermissions();
 
-                    return response()->json([
-                        'status' => true,
-                        'message' => 'Login successful',
-                        'token' => [
+                    if($request->pat) {
+                        $tokenObj = [
+                            'token_type' => "Bearer",
+                            'expires_in' => (int) (config('app.passport_personal_access_tokens_expire_in') * 24 * 60 * 60),
+                            'expires_on' => $getTokenData->token->expires_at,
+                            'access_token' => $getTokenData->accessToken,
+                            'token_id' => $getTokenData->token->id,
+                            'token_name' => $getTokenData->token->name
+                        ];
+                    } else {
+                        $tokenObj = [
                             'token_type' => $getTokenData->token_type,
                             'expires_in' => $getTokenData->expires_in,
                             'expires_on' => Carbon::now()->add($getTokenData->expires_in . ' seconds'),
@@ -118,7 +142,13 @@ class LoginController extends Controller
                             'refresh_expires_on' => Carbon::now()->add((((int) config('app.passport_refresh_tokens_expire_in')) * 60) . ' seconds'),
                             'access_token' => $getTokenData->access_token,
                             'refresh_token' => $getTokenData->refresh_token
-                        ],
+                        ];
+                    }
+
+                    return response()->json([
+                        'status' => true,
+                        'message' => $responseMsg,
+                        'token' => $tokenObj,
                         'user' => $userInfo
                     ]);
                 } else {
@@ -132,9 +162,11 @@ class LoginController extends Controller
                         return $this->failure("Authentication error", 200);
                     }
                 }
+            } else {
+                // Invalid credentials. Throttle login attempts
             }
         } else {
-            // User id not found. Throttle login increment
+            // User id not found. Throttle login attempts
         }
 
         // 6) Maximum failed attempt
@@ -168,7 +200,7 @@ class LoginController extends Controller
         // split the token to get user_id
         $tokenParts = explode('.', $getNewTokenData->access_token);
         $payload = base64_decode($tokenParts[1]);
-        
+
         // Logging into audit log
         Controller::audit_log(User::find(json_decode($payload)->sub)->user_id, $request, "auth.refreshtoken");
 
