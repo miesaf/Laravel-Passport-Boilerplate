@@ -121,7 +121,7 @@ class LoginController extends Controller
                         'last_signin' => Auth::user()->current_signin
                     ]);
 
-                    $userInfo = User::with('client.addresses')->with('driver')->find(Auth::user()->id);
+                    $userInfo = User::find(Auth::user()->id);
                     $userInfo->getAllPermissions();
 
                     if($request->pat) {

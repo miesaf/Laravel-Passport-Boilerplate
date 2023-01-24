@@ -14,7 +14,7 @@ class PasswordPoliciesSeeder extends Seeder
      */
     public function run()
     {
-        PasswordPolicy::create(['name' => 'Minimum length', 'desc' => 'The minimim number of characters need to have', 'value' => 8, 'status' => false]);
+        PasswordPolicy::create(['name' => 'Minimum length', 'desc' => 'The minimum number of characters need to have', 'value' => 8, 'status' => false]);
         PasswordPolicy::create(['name' => 'Maximum length', 'desc' => 'The maximum number of characters can have', 'value' => 20, 'status' => false]);
         PasswordPolicy::create(['name' => 'Alphanumeric', 'desc' => 'Combination of numbers and alphabets', 'value' => null, 'status' => false]);
         PasswordPolicy::create(['name' => 'Multicase', 'desc' => 'Combination of upper and lower cases', 'value' => null, 'status' => false]);
