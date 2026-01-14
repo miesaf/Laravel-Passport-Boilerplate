@@ -37,11 +37,20 @@ RUN composer dump-autoload --optimize \
 # -----------------------------
 FROM php:8.1-fpm-alpine
 
-# Runtime packages
+# Runtime packages (keep these)
 RUN apk add --no-cache \
-      nginx supervisor bash curl ca-certificates icu-libs libzip oniguruma \
+      nginx supervisor bash curl ca-certificates icu-libs libzip oniguruma
+
+# Build PHP extensions with proper build deps, then remove them
+RUN apk add --no-cache --virtual .build-deps \
+      $PHPIZE_DEPS \
+      icu-dev \
+      libzip-dev \
+      oniguruma-dev \
+      zlib-dev \
     && docker-php-ext-configure intl \
-    && docker-php-ext-install pdo pdo_mysql mbstring bcmath intl zip opcache \
+    && docker-php-ext-install -j"$(nproc)" pdo pdo_mysql mbstring bcmath intl zip opcache \
+    && apk del .build-deps \
     && rm -rf /var/cache/apk/*
 
 WORKDIR /var/www/html
