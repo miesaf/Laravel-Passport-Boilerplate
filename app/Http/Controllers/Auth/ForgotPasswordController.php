@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 // use Illuminate\Validation\Rules\Password;
 use Illuminate\Http\Request;
 use App\Http\Traits\ResponseTrait;
@@ -11,25 +10,13 @@ use App\Mail\APIResetPassword;
 use App\Models\User;
 use Carbon\Carbon;
 use Mail;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Str;
 use DB;
 
 class ForgotPasswordController extends Controller
 {
     use ResponseTrait;
-
-    /*
-    |--------------------------------------------------------------------------
-    | Password Reset Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller is responsible for handling password reset emails and
-    | includes a trait which assists in sending these notifications from
-    | your application to your users. Feel free to explore this trait.
-    |
-    */
-
-    use SendsPasswordResetEmails;
 
     public function sendResetLinkEmail(Request $request)
     {
@@ -63,13 +50,14 @@ class ForgotPasswordController extends Controller
             $reset->appURL = config('app.url_fe');
             $reset->userName = $user->name;
 
-            Mail::to($user->email)->send(new APIResetPassword($reset));
-
-            if(Mail::failures()) {
+            try {
+                Mail::to($user->email)->send(new APIResetPassword($reset));
+            } catch (TransportExceptionInterface $e) {
+                report($e);
                 return $this->failure("Failed to send reset link email.");
-            } else {
-                return $this->success("Please check your email for reset link.");
             }
+
+            return $this->success("Please check your email for reset link.");
         } else {
             return $this->failure("User ID not found");
         }
