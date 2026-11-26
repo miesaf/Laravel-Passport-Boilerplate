@@ -73,6 +73,12 @@ class PermissionSeeder extends Seeder
 
         $role3 = Role::create(['name' => 'User', 'guard_name' => 'api']);
 
+        // Demo users (password "password") only outside production: a public server must not carry them.
+        // On production, create the first admin with tinker (see README).
+        if (app()->environment('production')) {
+            return;
+        }
+
         // create demo users
         $user = User::factory()->create([
             'user_id' => 'admin',

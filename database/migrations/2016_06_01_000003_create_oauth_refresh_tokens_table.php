@@ -4,35 +4,16 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateOauthRefreshTokensTable extends Migration
+return new class extends Migration
 {
     /**
-     * The database schema.
-     *
-     * @var \Illuminate\Database\Schema\Builder
-     */
-    protected $schema;
-
-    /**
-     * Create a new migration instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->schema = Schema::connection($this->getConnection());
-    }
-
-    /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        $this->schema->create('oauth_refresh_tokens', function (Blueprint $table) {
-            $table->string('id', 100)->primary();
-            $table->string('access_token_id', 100)->index();
+        Schema::create('oauth_refresh_tokens', function (Blueprint $table) {
+            $table->char('id', 80)->primary();
+            $table->char('access_token_id', 80)->index();
             $table->boolean('revoked');
             $table->dateTime('expires_at')->nullable();
         });
@@ -40,21 +21,17 @@ class CreateOauthRefreshTokensTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        $this->schema->dropIfExists('oauth_refresh_tokens');
+        Schema::dropIfExists('oauth_refresh_tokens');
     }
 
     /**
      * Get the migration connection name.
-     *
-     * @return string|null
      */
-    public function getConnection()
+    public function getConnection(): ?string
     {
-        return config('passport.storage.database.connection');
+        return $this->connection ?? config('passport.connection');
     }
-}
+};

@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Providers\RouteServiceProvider;
-use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Request;
 use App\Http\Traits\ResponseTrait;
 use App\Models\User;
@@ -18,26 +16,6 @@ class ResetPasswordController extends Controller
 {
     use ResponseTrait;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Password Reset Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller is responsible for handling password reset requests
-    | and uses a simple trait to include this behavior. You're free to
-    | explore this trait and override any methods you wish to tweak.
-    |
-    */
-
-    use ResetsPasswords;
-
-    /**
-     * Where to redirect users after resetting their password.
-     *
-     * @var string
-     */
-    protected $redirectTo = RouteServiceProvider::HOME;
-
     public function reset(Request $request)
     {
         // Validate token existance/string validity
@@ -50,7 +28,7 @@ class ResetPasswordController extends Controller
             $T_created = Carbon::createFromTimeString($token->created_at);
 
             // Validate token time frame validity
-            if($T_now->diffInMinutes($T_created) < 60) {
+            if($T_created->diffInMinutes($T_now) < 60) {
                 // Check User ID exixtance
                 if($user = DB::table('users')->where('user_id', $token->user_id)->first()) {
                     // Validate password policy

@@ -12,6 +12,8 @@ class AuditLogsController extends Controller
 {
     use ResponseTrait;
 
+    protected AuditLog $auditLog;
+
     public function __construct(AuditLog $auditLog) {
         $this->auditLog = $auditLog;
     }

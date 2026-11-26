@@ -23,7 +23,6 @@ class APIResetPassword extends Mailable
         $this->reset = $reset;
     }
 
-
     /**
      * Build the message.
      *
