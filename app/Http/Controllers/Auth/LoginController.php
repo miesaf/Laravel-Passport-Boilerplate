@@ -3,12 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Providers\RouteServiceProvider;
 use App\Http\Traits\ResponseTrait;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
-use Laravel\Passport\TokenRepository;
-use Laravel\Passport\RefreshTokenRepository;
+use Laravel\Passport\Passport;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\PasswordPolicy;
@@ -18,41 +15,6 @@ use Http;
 class LoginController extends Controller
 {
     use ResponseTrait;
-
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
-
-    use AuthenticatesUsers;
-
-    /**
-     * Where to redirect users after login.
-     *
-     * @var string
-     */
-    protected $redirectTo = RouteServiceProvider::HOME;
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('guest')->except('logout');
-    }
-
-    public function username()
-    {
-        return 'user_id';
-    }
 
     public function login(Request $request)
     {
@@ -197,12 +159,16 @@ class LoginController extends Controller
 
         $getNewTokenData = $this->refreshOauthToken($request->refresh_token);
 
+        if(!isset($getNewTokenData->access_token)) {
+            return $this->failure("Invalid or expired refresh token", 401);
+        }
+
         // split the token to get user_id
         $tokenParts = explode('.', $getNewTokenData->access_token);
         $payload = base64_decode($tokenParts[1]);
 
         // Logging into audit log
-        Controller::audit_log(User::find(json_decode($payload)->sub)->user_id, $request, "auth.refreshtoken");
+        Controller::audit_log(User::find(json_decode($payload)->sub)->user_id, Controller::mask_value($request), "auth.refreshtoken");
 
         return response()->json([
             'status'=>true,
@@ -221,25 +187,22 @@ class LoginController extends Controller
 
     public function logout(Request $request) {
         try {
-            $tokenRepository = app(TokenRepository::class);
-            $refreshTokenRepository = app(RefreshTokenRepository::class);
-
             if($request->bearerToken()) {
                 $token = $request->bearerToken();
                 $jwt = explode(".", $token);
                 $token_id = json_decode(base64_decode($jwt[1]))->jti;
 
                 // Revoke an access token...
-                $tokenRepository->revokeAccessToken($token_id);
+                Passport::token()->whereKey($token_id)->update(['revoked' => true]);
 
                 // Revoke all of the token's refresh tokens...
-                $refreshTokenRepository->revokeRefreshTokensByAccessTokenId($token_id);
+                Passport::refreshToken()->where('access_token_id', $token_id)->update(['revoked' => true]);
             }
 
             return $this->success("Logout successful");
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             report($e);
-            return $this->failed("Token revocation failed");
+            return $this->failure("Token revocation failed");
         }
     }
 

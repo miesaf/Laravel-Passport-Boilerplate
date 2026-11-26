@@ -101,7 +101,7 @@ class Controller extends BaseController
             $now = Carbon::now();
             $password_created_at = Carbon::parse($user->password_created_at);
 
-            if($now->diffInDays($password_created_at) < $policies[9]->value) {
+            if($password_created_at->diffInDays($now) < $policies[9]->value) {
                 return ['status'=>false, 'message'=>'Your password has not passed minimum age of ' . $policies[9]->value . ' day(s). Password change rejected.'];
             }
         }
@@ -170,7 +170,7 @@ class Controller extends BaseController
             $user = $this->get_user($user_id);
             $last_login = Carbon::parse($user->password_created_at);
 
-            if($now->diffInDays($last_login) > $policies[10]->value) {
+            if($last_login->diffInDays($now) > $policies[10]->value) {
                 return ['status'=>false, 'message'=>'Action blocked because your password has expired. Please change to your new password.'];
             }
         }
@@ -208,7 +208,7 @@ class Controller extends BaseController
             $user = $this->get_user($user_id);
             $last_login = Carbon::parse($user->current_signin);
 
-            if($now->diffInDays($last_login) > $policies[11]->value) {
+            if($last_login->diffInDays($now) > $policies[11]->value) {
                 User::where('user_id', $user_id)->first()->update(['is_active' => false]);
                 return ['status'=>false, 'message'=>'Your account was deactivated due to being dormant for more than ' . $policies[11]->value . ' days.'];
             }
@@ -222,7 +222,8 @@ class Controller extends BaseController
 
         $audit->user_id = $user_id;
         $audit->req_time = $now;
-        $audit->vardata = $vardata;
+        // Never store bearer tokens or cookies sent with the request
+        $audit->vardata = preg_replace('/^(Authorization|Cookie):[^\r\n]*/mi', '$1: ********', (string) $vardata);
         $audit->category = $category;
 
         if(!$audit->save()) {
@@ -259,6 +260,10 @@ class Controller extends BaseController
 
         if(isset($jsonObj->new_password)) {
             $jsonObj->new_password = "********";
+        }
+
+        if(isset($jsonObj->refresh_token)) {
+            $jsonObj->refresh_token = "********";
         }
 
         // Encode back JSON
