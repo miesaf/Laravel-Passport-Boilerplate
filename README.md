@@ -1,64 +1,57 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Laravel Passport Boilerplate
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A backend API boilerplate on **Laravel 13 / PHP 8.5**:
 
-## About Laravel
+- Login with OAuth2 access + refresh tokens (Laravel Passport password grant), or a long-lived
+  personal access token (`"pat": true`), refresh and logout (token revocation)
+- First-time login (set password), change password, forgot/reset password by email
+- 16 configurable password policies (length, complexity, minimum/maximum age, reuse, lockout on
+  failed attempts, dormant accounts, compromised passwords, ...)
+- Users, roles and permissions (spatie/laravel-permission, wildcard permissions such as `users.*`)
+- Reference codes ("options") and an audit log of sensitive actions
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Its companion front end is [Vue Passport Boilerplate](https://github.com/miesaf/Vue-Passport-Boilerplate).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Setup
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```bash
+composer install
+cp .env.example .env            # set DB_*, APP_URL, APP_FE
+php artisan key:generate
+php artisan passport:keys       # writes storage/app/secrets/oauth/oauth-*.key (never commit them)
+php artisan migrate --seed      # demo users admin / moderator / user, password "password"
+php artisan passport:client --personal --name="Personal Access Client" --provider=users -n
+php artisan passport:client --password --name="Password Grant Client" --provider=users -n
+```
 
-## Learning Laravel
+Put the password grant client's ID and secret in `PASSPORT_CLIENT_ID` / `PASSPORT_CLIENT_SECRET`
+(the secret is shown once; Passport stores only its hash).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Login posts to this app's own `/oauth/token` (`PASSPORT_LOGIN_ENDPOINT`, default `APP_URL/oauth/token`),
+so the local server needs more than one worker:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+PHP_CLI_SERVER_WORKERS=4 php artisan serve --no-reload
+```
 
-## Laravel Sponsors
+## API
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+All routes are under `/api`. Send `Accept: application/json`; authenticated routes take
+`Authorization: Bearer <access_token>`.
 
-### Premium Partners
+| Route | Purpose |
+|---|---|
+| `POST login` (`user_id`, `password`, optional `pat`) | tokens + user with roles and permissions |
+| `POST refreshToken` (`refresh_token`) | new token pair |
+| `POST logout` | revoke the bearer token and its refresh tokens |
+| `POST password/firstTime` (`user_id`, `new_password`) | set the first password |
+| `POST password/email` (`user_id`) | email a reset link to `APP_FE/password/reset/<token>` (valid 60 minutes) |
+| `POST password/reset` (`token`, `new_password`) | reset the password |
+| `GET user`, `POST user/changePassword` | own profile, change password |
+| `permissions`, `roles`, `users`, `options`, `pwdPolicies`, `auditLogs` | management screens (permission checked per action) |
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+## Tests
 
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan test
+```
