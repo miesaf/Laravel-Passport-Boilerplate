@@ -26,11 +26,20 @@ Keep the API routes and JSON response shapes stable: the front end depends on th
 - `App\Console\ComposerScripts::discoverPackages` builds the package manifest inside Composer, because the
   host's PHP 8.5 CLI has `proc_open` disabled.
 
+## Status (2026-11-27)
+
+- Deployed on 2026-11-26 (PR #5, Laravel 13, PHP 8.5.13); first-deploy steps done then (new `APP_KEY`, Passport keys,
+  both clients in `.env`, migrations, roles and permissions seeded without the demo users). ClickUp `86d4e29q4` is complete.
+- Open: there are no users on production; the owner creates the first admin with `artisan tinker`.
+- The archive's root `.htaccess` (not in this repo) also refuses `..` requests and serves no `connectDB.php`, `config.json`,
+  `*.sql`, `*.log`, `*.md`, `error_log`, `LICENSE*` or composer/package files in any folder.
+
 ## Deploy (archive host, folder served at `/<folder>/public`)
 
 No path overrides; `APP_URL` = the `/public` URL. In the folder, with the PHP 8.5 CLI `/opt/alt/php85/usr/bin/php`:
 
-1. `git pull`, then `composer install --no-dev --optimize-autoloader`
+1. The server's clone has an SSH remote and no key: `git fetch https://github.com/miesaf/Laravel-Passport-Boilerplate.git master`
+   and `git merge --ff-only FETCH_HEAD`, then `composer install --no-dev --optimize-autoloader`
 2. `.env`: `APP_ENV=production`, `APP_DEBUG=false`, `CACHE_STORE=file`, `MAIL_*`; first deploy only:
    `artisan passport:keys`, `artisan migrate --force --seed`, create the personal access and password
    grant clients (`artisan passport:client --personal|--password --provider=users -n`) and put the
