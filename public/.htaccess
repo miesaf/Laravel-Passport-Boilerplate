@@ -1,3 +1,8 @@
+# The app runs on PHP 8.5, whatever the PHP version of the rest of the archive site.
+<FilesMatch "\.php$">
+    SetHandler application/x-lsphp85
+</FilesMatch>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
